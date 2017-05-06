@@ -11,6 +11,7 @@ var FISHTANK = (function () {
         this.distance = 0.5;
         this.zoom = 1;
         this.tilt = 0;
+        this.towerRotation = 0;
         this.TILT_MAX = Math.PI * 0.49;
         this.drawAllCheckbox = document.getElementById("drawAll");
         this.turntableCheckbox = document.getElementById("turntable");
@@ -19,6 +20,7 @@ var FISHTANK = (function () {
         this.loadState = null;
 
         this.files = ["images/test.json"];
+        this.billboardImage = null;
         this.cans = [];
         this.things = null;
         this.canHeight = null;
@@ -43,6 +45,7 @@ var FISHTANK = (function () {
         for (var b = 0; b < blumps.length; ++b) {
             blumps[b].loadImage(batch);
         }
+        this.billboardImage = batch.load("../blitblort/images/uv.png");
         batch.commit();
     };
 
@@ -66,19 +69,29 @@ var FISHTANK = (function () {
     };
 
     Tank.prototype.setupCans = function (cans) {
-        this.cans = cans;
+        this.cans = []
         this.things = [];
 
         var canCount = cans.length,
-            ySize = this.canHeight * this.cans[0].pixelSize,
+            ySize = this.canHeight * cans[0].pixelSize,
             yOffset = -0.5 * canCount * ySize;
         for (var c = 0; c < canCount; ++c) {
             var thing = new BLOB.Thing();
-            thing.mesh = this.cans[c].mesh;
+            thing.mesh = cans[c].mesh;
             thing.move(new R3.V(0, yOffset, 0));
             this.things.push(thing);
+            this.cans.push(thing);
             yOffset += ySize;
         }
+
+        var billboardAtlas = new WGL.TextureAtlas(this.billboardImage.width, this.billboardImage.height, 1),
+            billboardCoords = billboardAtlas.add(this.billboardImage),
+            billboardMesh = WGL.makeBillboard(billboardAtlas.texture(), billboardCoords);
+        this.billboard = new BLOB.Thing(billboardMesh);
+        this.billboard.setPosition(new R3.V(0.2, 0, 0));
+        this.billboard.scaleBy(0.04);
+        this.billboard.setBillboardUp(new R3.V(0, 1, 0));
+        this.things.push(this.billboard);
     };
 
     Tank.prototype.setupRoom = function (room) {
@@ -99,19 +112,20 @@ var FISHTANK = (function () {
                 });
             }
         }
-        if (this.things) {
-            var angleDelta = 0;
-            if (pointer.primary) {
-                angleDelta = pointer.primary.deltaX * 0.01;
-            } else if (!this.turntableCheckbox || this.turntableCheckbox.checked) {
-                var turnRate = (this.turnRate ? parseFloat(this.turnRate.value) : null) || 1;
-                angleDelta = elapsed * Math.PI * 0.001 * turnRate;
-            }
-            var animRate = (this.animRate ? parseFloat(this.animRate.value) : null) || 1;
+        if (this.cans) {
+        }
 
+        if (this.billboard) {
+            var turnRate = (this.turnRate ? parseFloat(this.turnRate.value) : null) || 1,
+                billboardAngleDelta = elapsed * Math.PI * 0.001 * turnRate,
+                m = R3.makeRotateQ(R3.angleAxisQ(billboardAngleDelta, new R3.V(1, 0, 0)));
+            //this.billboard.setBillboardUp(m.transformV(this.billboard.billboardUp));
+        }
+
+        if (this.things) {
+            var animRate = (this.animRate ? parseFloat(this.animRate.value) : null) || 1;
             for (var t = 0; t < this.things.length; ++t) {
                 var thing = this.things[t];
-                thing.rotate(angleDelta, new R3.V(0, 1, 0));
                 thing.update(elapsed * animRate);
             }
         }
@@ -119,6 +133,9 @@ var FISHTANK = (function () {
         if (pointer.primary) {
             this.tilt += pointer.primary.deltaY * 0.5 * R2.DEG_TO_RAD;
             this.tilt = R2.clamp(this.tilt, -this.TILT_MAX, this.TILT_MAX);
+
+            var angleDelta =  pointer.primary.deltaX * 0.01;
+            this.towerRotation += angleDelta;
         }
 
         if (pointer.wheelY) {
@@ -129,9 +146,12 @@ var FISHTANK = (function () {
 
     Tank.prototype.eyePosition = function () {
         var d = this.distance * this.zoom,
-            x = Math.cos(this.tilt),
-            y = Math.sin(this.tilt);
-        return new R3.V(x * d, y * d, 0);
+            hOffset = Math.cos(this.tilt),
+            x = Math.cos(this.towerRotation) * hOffset,
+            y = Math.sin(this.tilt),
+            z = Math.sin(this.towerRotation) * hOffset;
+
+        return new R3.V(x * d, y * d, z * d);
     };
 
     Tank.prototype.render = function (room, width, height) {
