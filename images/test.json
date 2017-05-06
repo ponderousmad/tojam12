@@ -1,0 +1,43 @@
+{
+    "pixelSize": 0.002,
+    "depthRange": 0.05,
+    "depthOffset": 0.1,
+    "blumps": [
+        {
+            "resource": "striptest_1.png",
+            "texture": "strip_color.png",
+            "geometry": "cylinder",
+            "angle": 0
+        },
+        {
+            "resource": "striptest_2.png",
+            "texture": "strip_color.png",
+            "geometry": "cylinder",
+            "angle": 0
+        },
+        {
+            "resource": "striptest_3.png",
+            "texture": "strip_color.png",
+            "geometry": "cylinder",
+            "angle": 0
+        },
+        {
+            "resource": "striptest_curve_3.png",
+            "texture": "strip_color.png",
+            "geometry": "cylinder",
+            "angle": 0
+        },
+        {
+            "resource": "striptest_curve_3.png",
+            "texture": "strip_color.png",
+            "geometry": "cylinder",
+            "angle": 0
+        },
+        {
+            "resource": "striptest_curve_3.png",
+            "texture": "strip_color.png",
+            "geometry": "cylinder",
+            "angle": 0
+        }
+    ]
+}

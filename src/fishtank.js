@@ -18,9 +18,10 @@ var FISHTANK = (function () {
         this.loadingFile = 0;
         this.loadState = null;
 
-        this.files = ["images/blump.json"];
+        this.files = ["images/test.json"];
         this.cans = [];
         this.things = null;
+        this.canHeight = null;
     }
 
     Tank.prototype.batch = function (blumpData) {
@@ -28,9 +29,10 @@ var FISHTANK = (function () {
 
         var blumps = [],
             pixelSize = blumpData.pixelSize || 0.001,
-            depthRange = blumpData.depthRange || 0.2;
+            depthRange = blumpData.depthRange || 0.2,
+            depthOffset = blumpData.depthOffset || 0.1;
         for (var d = 0; d < blumpData.blumps.length; ++d) {
-            blumps.push(new BLUMP.Blump(blumpData.blumps[d], pixelSize, depthRange));
+            blumps.push(new BLUMP.Blump(blumpData.blumps[d], pixelSize, depthRange,  depthOffset));
         }
 
         var self = this,
@@ -48,6 +50,9 @@ var FISHTANK = (function () {
         this.loadState = "constructing";
         var image = blumps[0].image,
             atlas = blumps[0].constructAtlas(blumps.length);
+        if (this.canHeight === null) {
+            this.canHeight = image.height;
+        }
         for (var b = 0; b < blumps.length; ++b) {
             blumps[b].construct(atlas, false, false);
             blumps[b].image = null;
@@ -64,12 +69,12 @@ var FISHTANK = (function () {
         this.cans = cans;
         this.things = [];
 
-        var canCount = 5,
-            ySize = 49 * this.cans[0].pixelSize,
+        var canCount = cans.length,
+            ySize = this.canHeight * this.cans[0].pixelSize,
             yOffset = -0.5 * canCount * ySize;
-        for (var i = 0; i < 5; ++i) {
+        for (var c = 0; c < canCount; ++c) {
             var thing = new BLOB.Thing();
-            thing.mesh = this.cans[0].mesh;
+            thing.mesh = this.cans[c].mesh;
             thing.move(new R3.V(0, yOffset, 0));
             this.things.push(thing);
             yOffset += ySize;
