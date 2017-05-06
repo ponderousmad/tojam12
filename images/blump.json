@@ -1,15 +1,17 @@
 {
     "blumps": [
         {
-            "resource": "../../images/bump.png",
-            "texture": "../../images/texture.jpg",
+            "resource": "bump.png",
+            "texture": "texture.jpg",
+            "geometry": "cylinder",
             "angle": 0,
             "lrOffset": 0,
             "fbOffset": 0,
             "vOffset": 0,
             "scale": 1,
-            "pixelSize": 0.001,
-            "depthRange": 0.02
+            "pixelSize": 0.002,
+            "depthRange": 0.05,
+            "depthOffset": 0.1
         }
     ]
 }
