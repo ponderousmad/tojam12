@@ -35,7 +35,7 @@ var FISHTANK = (function () {
         this.textureCanvas.width = this.textureCanvas.height = 512;
 
         this.thing = new BLOB.Thing(WGL.makeBillboard(this.textureCanvas, WGL.uvFill()));
-        this.thing.scaleBy(0.12);
+        this.thing.scaleBy(0.24);
 
         this.updatePosition();
         return this.thing
@@ -65,10 +65,10 @@ var FISHTANK = (function () {
 
         this.textureContext.clearRect(0, 0, this.textureCanvas.width, this.textureCanvas.height);
         if (this.swimAnim) {
-            this.swimAnim.draw(this.textureContext, 0, 0, BLIT.ALIGN.TopLeft);
+            this.swimAnim.draw(this.textureContext, 256, 256, BLIT.ALIGN.Center, 240, 420);
         } else {
             this.idleAnim.update(animElapsed);
-            this.idleAnim.draw(this.textureContext, 0, 0, BLIT.ALIGN.TopLeft);
+            this.idleAnim.draw(this.textureContext, 256, 256, BLIT.ALIGN.Center, 256, 256);
         }
         this.thing.mesh.updatedTexture = true;
 
@@ -116,9 +116,13 @@ var FISHTANK = (function () {
 
         this.height += this.verticalVelocity * elapsed;
 
-        var BOTTOM = -0.2;
+        var BOTTOM = -0.2,
+            TOP = 8.3;
         if (this.height < BOTTOM) {
             this.height = BOTTOM;
+            this.verticalVelocity = 0;
+        } else if (this.height > TOP) {
+            this.height = TOP;
             this.verticalVelocity = 0;
         }
 
@@ -297,8 +301,8 @@ var FISHTANK = (function () {
 
     Tank.prototype.finalize = function () {
         console.log("Load completed!");
-        var hOffset = 0,
-            angles = [30, 270, 58, 180, 90, 30, 270, 58, 180, 90];
+        var hOffset = -.5,
+            angles = [58, 30, 270, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58, 180, 90];
 
         for (var c = 0; c < this.cans.length; ++c) {
             for (var a = 0; a < angles.length; ++a) {
@@ -307,17 +311,14 @@ var FISHTANK = (function () {
             }
         }
 
-        var urchinPos = this.jellyfish.thing.position.copy();
-        urchinPos.x += 0.1;
-        urchinPos.y += 0.5;
-
-        this.obstacles.push(new Obstacle(urchinPos, "obsUrchin"));
-
         for (var o = 0; o < this.obstacles.length; ++o) {
             var obstacle = this.obstacles[o];
             if (obstacle.type === "obsUrchin") {
-                var thing = new BLOB.Thing(WGL.makeBillboard(urchinImage, WGL.uvFill()));
-                thing.setPosition(obstacle.position);
+                var thing = new BLOB.Thing(WGL.makeBillboard(urchinImage, WGL.uvFill())),
+                    pos = obstacle.position;
+                pos.x *= 1.2;
+                pos.z *= 1.2;
+                thing.setPosition(pos);
                 thing.scaleBy(0.15);
                 thing.setBillboardUp(new R3.V(0, 1, 0));
                 this.urchins.push(thing);
