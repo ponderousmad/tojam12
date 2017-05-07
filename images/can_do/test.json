@@ -1,6 +1,6 @@
 {
     "pixelSize": 0.002,
-    "depthRange": 0.05,
+    "depthRange": 0.08,
     "depthOffset": 0.6,
     "blumps": [
         {
