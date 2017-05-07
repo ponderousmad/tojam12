@@ -250,9 +250,21 @@ var FISHTANK = (function () {
         this.things = [];
         this.obstacles = [];
         this.urchins = [];
+        this.stars = [];
 
         this.backgroundImages = [];
         this.backgrounds = [];
+
+        this.urchinAnim = null;
+        this.starAnim = null;
+
+        this.urchinCanvas = document.createElement('canvas');
+        this.urchinContext = this.urchinCanvas.getContext('2d');
+        this.urchinCanvas.width = this.urchinCanvas.height = 128;
+
+        this.starCanvas = document.createElement('canvas');
+        this.starContext = this.starCanvas.getContext('2d');
+        this.starCanvas.width = this.starCanvas.height = 128;
 
         this.gameStarted = false;
         this.music = new BLORT.Tune("sounds/MusicLoop");
@@ -273,6 +285,9 @@ var FISHTANK = (function () {
         this.backgroundImages.push(batch.load("bg_layer1.png"));
         this.backgroundImages.push(batch.load("bg_layer2.png"));
         jellyfish = new Jellyfish(batch);
+
+        this.urchinAnim = new BLIT.Flip(batch, "urchy_", 12, 2).setupPlayback(50, true);
+        this.starAnim = new BLIT.Flip(batch, "star_", 18, 2).setupPlayback(50, true);
         batch.commit();
     };
 
@@ -366,14 +381,24 @@ var FISHTANK = (function () {
         for (var o = 0; o < this.obstacles.length; ++o) {
             var obstacle = this.obstacles[o];
             if (obstacle.type === "obsUrchin") {
-                var thing = new BLOB.Thing(WGL.makeBillboard(urchinImage, WGL.uvFill())),
-                    pos = obstacle.position;
+                var thing = new BLOB.Thing(WGL.makeBillboard(this.urchinCanvas, WGL.uvFill())),
+                    pos = obstacle.position.copy();
                 pos.x *= 1.2;
                 pos.z *= 1.2;
                 thing.setPosition(pos);
                 thing.scaleBy(0.15);
                 thing.setBillboardUp(new R3.V(0, 1, 0));
                 this.urchins.push(thing);
+            }
+            if (obstacle.type === "obsStar") {
+                var thing = new BLOB.Thing(WGL.makeBillboard(this.starCanvas, WGL.uvFill())),
+                    pos = obstacle.position.copy();
+                pos.x *= 1.1;
+                pos.z *= 1.1;
+                thing.setPosition(pos);
+                thing.scaleBy(0.1);
+                thing.setBillboardUp(new R3.V(0, 1, 0));
+                this.stars.push(thing);
             }
         }
         this.gameStarted = true;
@@ -411,6 +436,14 @@ var FISHTANK = (function () {
                 });
             }
         } else {
+            this.urchinAnim.update(elapsed);
+            this.starAnim.update(elapsed);
+
+            this.urchinContext.clearRect(0, 0, 128, 128);
+            this.urchinAnim.draw(this.urchinContext, 64, 64, BLIT.ALIGN.Center, 128, 128);
+            this.starContext.clearRect(0, 0, 128, 128);
+            this.starAnim.draw(this.starContext, 64, 64, BLIT.ALIGN.Center, 128, 128);
+
             if (keyboard.wasKeyPressed(IO.KEYS.Space)) {
                 if (this.gameStarted) {
                     swim = true;
@@ -464,8 +497,26 @@ var FISHTANK = (function () {
             }
 
             room.gl.depthMask(false);
+            var texture = null;
             for (var u = 0; u < this.urchins.length; ++u) {
-                this.urchins[u].render(room, this.program, eye);
+                var urchin = this.urchins[u];
+                if (Math.abs(urchin.position.y - eye.y) < 1) {
+                    if (texture === null) {
+                        texture = room.rebindTexture(urchin.mesh, this.program);
+                    }
+                    urchin.render(room, this.program, eye, texture);
+                }
+            }
+
+            texture = null;
+            for (var s = 0; s < this.stars.length; ++s) {
+                var star = this.stars[s];
+                if (Math.abs(star.position.y - eye.y) < 1) {
+                    if (texture === null) {
+                        texture = room.rebindTexture(star.mesh, this.program);
+                    }
+                    star.render(room, this.program, eye, texture);
+                }
             }
 
             // Need to draw billboards last for alpha blending to work.
