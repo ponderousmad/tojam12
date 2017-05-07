@@ -37,7 +37,7 @@ var FISHTANK = (function () {
         return this.thing
     }
 
-    Jellyfish.prototype.update = function (started, elapsed, swim, steer) {
+    Jellyfish.prototype.update = function (started, elapsed, swim, steer, obstacles) {
         var animElapsed = elapsed;
         if (!started) {
             elapsed = 0;
@@ -75,11 +75,38 @@ var FISHTANK = (function () {
 
         this.positionAngle += this.radialVelocity * elapsed;
 
+        var collisionSize = 0.2,
+            collisionSizeSq = collisionSize * collisionSize,
+            breaks = 0.005;
+
         if (this.height > 0) {
             this.verticalVelocity -= this.gravity * elapsed;
         } else {
-            this.verticalVelocity -= this.verticalVelocity * 0.1;
+            this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
         }
+
+        for (var o = 0; o < obstacles.length; ++o) {
+            var obstacle = obstacles[o],
+                distanceSq = R3.pointDistanceSq(this.thing.position, obstacle.position);
+
+            if (distanceSq < collisionSizeSq) {
+                if (obstacle.type === "obsSlow") {
+                    this.radialVelocity -= this.radialVelocity * breaks * elapsed;
+                    this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
+                } else {
+                    var verticalOffset = this.height - obstacle.position.y,
+                        obstacleAngle = Math.atan2(obstacle.z, obstacle.x),
+                        angleOffset = R2.clampAngle(obstacleAngle - this.positionAngle);
+                    if (Math.sign(verticalOffset) != Math.sign(this.verticalVelocity)) {
+                        this.verticalVelocity = 0;
+                    }
+                    if (Math.sin(angleOffset) != Math.sign(this.angleOffset)) {
+                        this.radialVelocity = 0;
+                    }
+                }
+            }
+        }
+
         this.height += this.verticalVelocity * elapsed;
 
         var BOTTOM = -0.2;
@@ -240,7 +267,7 @@ var FISHTANK = (function () {
     Tank.prototype.finalize = function () {
         console.log("Load completed!");
         var hOffset = 0,
-            angles = [30, 270, 58, 180, 90];
+            angles = [30, 270, 58, 180, 90, 30, 270, 58, 180, 90];
 
         for (var c = 0; c < this.cans.length; ++c) {
             for (var a = 0; a < angles.length; ++a) {
@@ -248,12 +275,13 @@ var FISHTANK = (function () {
                 hOffset = this.cans[c].place(hOffset, angle, this.things, this.obstacles);
             }
         }
-
+/*
         for (var o = 0; o < this.obstacles.length; ++o) {
             var thing = new BLOB.Thing(WGL.makeCube(0.1, true));
             thing.setPosition(this.obstacles[o].position);
             this.things.push(thing);
         }
+*/
     };
 
     Tank.prototype.setupRoom = function (room) {
@@ -303,7 +331,7 @@ var FISHTANK = (function () {
         }
 
         if (this.jellyfish) {
-            this.jellyfish.update(this.gameStarted, elapsed, swim, steer);
+            this.jellyfish.update(this.gameStarted, elapsed, swim, steer, this.obstacles);
             this.towerRotation = this.jellyfish.positionAngle;
             this.eyeHeight = this.jellyfish.height;
         }
