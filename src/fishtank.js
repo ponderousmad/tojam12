@@ -27,6 +27,14 @@ var FISHTANK = (function () {
 
         this.textureCanvas = null;
         this.textureContext = null;
+
+        this.swimSounds = [];
+        this.soundIndex = 0;
+
+        for (var step = 1; step <= 3; ++step) {
+            var noise = new BLORT.Noise("sounds/Swim0" + step + ".wav");
+            this.swimSounds.push(noise);
+        }
     }
 
     Jellyfish.prototype.construct = function () {
@@ -57,6 +65,8 @@ var FISHTANK = (function () {
                 this.swimAnim = null;
             }
         } else if (swim) {
+            this.swimSounds[this.soundIndex].play();
+            this.soundIndex = (this.soundIndex + 1) % this.swimSounds.length;
             var swimAngle = this.angle + Math.PI / 2;
             this.verticalVelocity += Math.sin(swimAngle) * velocity;
             this.radialVelocity -= Math.cos(swimAngle) * velocity / this.radialDistance;
