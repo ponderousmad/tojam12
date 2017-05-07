@@ -173,7 +173,7 @@ var FISHTANK = (function () {
     }
 
     function Tank(viewport, editor) {
-        this.clearColor = [0, 0, 0, 1];
+        this.clearColor = [97 / 255, 154 / 255, 130 / 255, 1];
         this.maximize = viewport === "safe";
         this.updateInDraw = true;
         this.preventDefaultIO = true;
@@ -197,6 +197,7 @@ var FISHTANK = (function () {
         this.urchins = [];
 
         this.backgroundImages = [];
+        this.backgrounds = [];
 
         this.gameStarted = false;
 
@@ -279,8 +280,19 @@ var FISHTANK = (function () {
         this.cans.push(can);
     };
 
-    Tank.prototype.setupBackgrounds = function () {
+    function makeBackground(texture, radius, height, bottom, uTile, vTile) {
+        var coords = { uMin: 0, vMin: 0, uSize:uTile, vSize: -vTile},
+            mesh = new WGL.makeCyclinder(radius, height, 20, coords, true),
+            thing = new BLOB.Thing(mesh);
+        thing.setPosition(new R3.V(0, bottom, 0));
+        mesh.image = texture;
+        return thing;
+    }
 
+    Tank.prototype.setupBackgrounds = function () {
+        this.backgrounds.push(makeBackground(this.backgroundImages[0], 10, 20, -12, 1, 1));
+        this.backgrounds.push(makeBackground(this.backgroundImages[2], 9.5, 20, -12, 8, 5));
+        this.backgrounds.push(makeBackground(this.backgroundImages[1], 3, 20, -12, 8, 5));
     };
 
     Tank.prototype.finalize = function () {
@@ -318,7 +330,7 @@ var FISHTANK = (function () {
         this.program = room.programFromElements("vertex-test", "fragment-test", true, false, true);
 
         room.viewer.near = 0.01;
-        room.viewer.far = 10;
+        room.viewer.far = 15;
         room.gl.enable(room.gl.CULL_FACE);
         room.gl.blendFunc(room.gl.SRC_ALPHA, room.gl.ONE_MINUS_SRC_ALPHA);
         room.gl.enable(room.gl.BLEND);
@@ -388,6 +400,10 @@ var FISHTANK = (function () {
                     thing.render(room, this.program, eye);
                 }
             }
+            for (var b = 0; b < this.backgrounds.length; ++b) {
+                this.backgrounds[b].render(room, this.program, eye);
+            }
+
             room.gl.depthMask(false);
             for (var u = 0; u < this.urchins.length; ++u) {
                 this.urchins[u].render(room, this.program, eye);
