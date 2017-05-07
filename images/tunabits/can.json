@@ -4,88 +4,88 @@
     "depthOffset": 0.6,
     "blumps": [
         {
-            "resource": "can_do/bump_half_1.png",
-            "texture": "can_do/tuna_can_1.png",
+            "resource": "tunabits/tuna_depth1.png",
+            "texture": "tunabits/tuna_col1.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 0
         },
         {
-            "resource": "can_do/bump_half_2.png",
-            "texture": "can_do/tuna_can_2.png",
+            "resource": "tunabits/tuna_depth2.png",
+            "texture": "tunabits/tuna_col2.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 45,
             "POIs" : [
                 {
-                    "x": 23,
-                    "y": 63,
+                    "x": 25,
+                    "y": 265,
                     "type": "obstacle"
                 }
             ]
         },
         {
-            "resource": "can_do/bump_half_3.png",
-            "texture": "can_do/tuna_can_3.png",
+            "resource": "tunabits/tuna_depth3.png",
+            "texture": "tunabits/tuna_col3.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 90
-        },
-        {
-            "resource": "can_do/bump_half_4.png",
-            "texture": "can_do/tuna_can_4.png",
-            "geometry": "cylinder",
-            "cylinderAngle": 45,
-            "angle": 135,
-            "POIs" : [
+			"POIs" : [
                 {
-                    "x": 16,
-                    "y": 63,
+                    "x": 477,
+                    "y": 212,
                     "type": "obstacle"
                 }
             ]
         },
         {
-            "resource": "can_do/bump_half_1.png",
-            "texture": "can_do/tuna_can_1.png",
+            "resource": "tunabits/tuna_depth4.png",
+            "texture": "tunabits/tuna_col4.jpg",
+            "geometry": "cylinder",
+            "cylinderAngle": 45,
+            "angle": 135,
+        },
+        {
+            "resource": "tunabits/tuna_depth1.png",
+            "texture": "tunabits/tuna_col1.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 180
         },
         {
-            "resource": "can_do/bump_half_2.png",
-            "texture": "can_do/tuna_can_2.png",
+            "resource": "tunabits/tuna_depth2.png",
+            "texture": "tunabits/tuna_col2.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 225,
             "POIs" : [
                 {
-                    "x": 23,
-                    "y": 63,
+                    "x": 25,
+                    "y": 265,
                     "type": "obstacle"
                 }
             ]
         },
         {
-            "resource": "can_do/bump_half_3.png",
-            "texture": "can_do/tuna_can_3.png",
+            "resource": "tunabits/tuna_depth3.png",
+            "texture": "tunabits/tuna_col3.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 270
-        },
-        {
-            "resource": "can_do/bump_half_4.png",
-            "texture": "can_do/tuna_can_4.png",
-            "geometry": "cylinder",
-            "cylinderAngle": 45,
-            "angle": 315,
-            "POIs" : [
+			"POIs" : [
                 {
-                    "x": 16,
-                    "y": 63,
+                    "x": 477,
+                    "y": 212,
                     "type": "obstacle"
                 }
             ]
+        },
+        {
+            "resource": "tunabits/tuna_depth4.png",
+            "texture": "tunabits/tuna_col4.jpg",
+            "geometry": "cylinder",
+            "cylinderAngle": 45,
+            "angle": 315,
         }
     ]
 }
