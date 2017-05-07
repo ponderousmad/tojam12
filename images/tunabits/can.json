@@ -55,6 +55,7 @@
                     "y": 75,
                     "type": "obsStar"
 				}
+			]
         },
         {
             "resource": "tunabits/tuna_depth1.png",
