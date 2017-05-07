@@ -1,6 +1,8 @@
 var FISHTANK = (function () {
     "use strict";
 
+    var urchinImage = null;
+
     function Jellyfish(batch) {
         this.thing = null;
 
@@ -28,9 +30,8 @@ var FISHTANK = (function () {
         this.textureCanvas = document.createElement('canvas');
         this.textureContext = this.textureCanvas.getContext('2d');
         this.textureCanvas.width = this.textureCanvas.height = 512;
-        var coords = { uMin: 0, vMin: 0, uSize: 1, vSize: 1 }
 
-        this.thing = new BLOB.Thing(WGL.makeBillboard(this.textureCanvas, coords));
+        this.thing = new BLOB.Thing(WGL.makeBillboard(this.textureCanvas, WGL.uvFill()));
         this.thing.scaleBy(0.12);
 
         this.updatePosition();
@@ -187,6 +188,7 @@ var FISHTANK = (function () {
         this.cans = [];
         this.things = [];
         this.obstacles = [];
+        this.urchins = [];
 
         this.gameStarted = false;
 
@@ -200,6 +202,7 @@ var FISHTANK = (function () {
                 jellyfish.construct();
                 self.jellyfish = jellyfish;
             });
+        urchinImage = batch.load("urchin.png");
         jellyfish = new Jellyfish(batch);
         batch.commit();
     };
@@ -275,13 +278,23 @@ var FISHTANK = (function () {
                 hOffset = this.cans[c].place(hOffset, angle, this.things, this.obstacles);
             }
         }
-/*
+
+        var urchinPos = this.jellyfish.thing.position.copy();
+        urchinPos.x += 0.1;
+        urchinPos.y += 0.5;
+
+        this.obstacles.push(new Obstacle(urchinPos, "obsUrchin"));
+
         for (var o = 0; o < this.obstacles.length; ++o) {
-            var thing = new BLOB.Thing(WGL.makeCube(0.1, true));
-            thing.setPosition(this.obstacles[o].position);
-            this.things.push(thing);
+            var obstacle = this.obstacles[o];
+            if (obstacle.type === "obsUrchin") {
+                var thing = new BLOB.Thing(WGL.makeBillboard(urchinImage, WGL.uvFill()));
+                thing.setPosition(obstacle.position);
+                thing.scaleBy(0.15);
+                thing.setBillboardUp(new R3.V(0, 1, 0));
+                this.urchins.push(thing);
+            }
         }
-*/
     };
 
     Tank.prototype.setupRoom = function (room) {
@@ -353,12 +366,18 @@ var FISHTANK = (function () {
             var eye = this.eyePosition();
             room.viewer.positionView(eye, new R3.V(0, this.eyeHeight, 0), new R3.V(0, 1, 0));
             room.setupView(this.program, this.viewport);
+            room.gl.depthMask(true);
             for (var t = 0; t < this.things.length; ++t) {
                 var thing = this.things[t];
                 if (Math.abs(thing.position.y - eye.y) < 1) {
                     thing.render(room, this.program, eye);
                 }
             }
+            room.gl.depthMask(false);
+            for (var u = 0; u < this.urchins.length; ++u) {
+                this.urchins[u].render(room, this.program, eye);
+            }
+
             // Need to draw billboards last for alpha blending to work.
             if (this.jellyfish) {
                 this.jellyfish.thing.render(room, this.program, eye);
