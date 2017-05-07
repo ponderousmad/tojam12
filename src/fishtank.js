@@ -214,6 +214,7 @@ var FISHTANK = (function () {
         this.backgrounds = [];
 
         this.gameStarted = false;
+        this.music = new BLORT.Tune("sounds/MusicLoop");
 
         this.batchAnimations();
     }
@@ -351,6 +352,12 @@ var FISHTANK = (function () {
         if (elapsed > 100) {
             elapsed = 100;
         }
+        if (!this.music.playing) {
+            if (this.music.isLoaded()) {
+                this.music.play();
+            }
+        }
+
         var swim = false,
             steer = 0;
         if (this.loadingFile < this.files.length) {
