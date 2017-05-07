@@ -9,12 +9,8 @@ var FISHTANK = (function () {
     function Jellyfish(batch) {
         this.thing = null;
 
-        this.angle = 0;
-        this.height = 0;
-        this.positionAngle = 0;
-        this.verticalVelocity = 0;
-        this.radialVelocity = 0;
-        this.swimAnim = null;
+        this.reset();
+
         this.radialDistance = 0.7;
 
         this.turnRate = Math.PI * 0.001;
@@ -24,6 +20,7 @@ var FISHTANK = (function () {
 
         this.idleAnim = new BLIT.Flip(batch, "jelly/idle_", 15, 5).setupPlayback(50, true);
         this.swimFlip = new BLIT.Flip(batch, "jelly/swim_", 15, 5);
+        this.deathFlip = new BLIT.Flip(batch, "jelly/die_", 11, 2);
 
         this.textureCanvas = null;
         this.textureContext = null;
@@ -31,10 +28,23 @@ var FISHTANK = (function () {
         this.swimSounds = [];
         this.soundIndex = 0;
 
+        this.deathSound = new BLORT.Noise("sounds/Death01.wav");
+
         for (var step = 1; step <= 3; ++step) {
             var noise = new BLORT.Noise("sounds/Swim0" + step + ".wav");
             this.swimSounds.push(noise);
         }
+    }
+
+    Jellyfish.prototype.reset = function () {
+        this.angle = 0;
+        this.height = 0;
+        this.positionAngle = 0;
+        this.verticalVelocity = 0;
+        this.radialVelocity = 0;
+        this.swimAnim = null;
+        this.deathAnim = null;
+        this.alive = true;
     }
 
     Jellyfish.prototype.construct = function () {
@@ -57,14 +67,29 @@ var FISHTANK = (function () {
         if (!started) {
             elapsed = 0;
         }
-        if (steer) {
-            this.angle += elapsed * steer * this.turnRate;
+
+        if (!this.alive) {
+            swim = false;
+            steer = 0;
+        }
+
+        if (this.deathAnim) {
+            if (this.deathAnim.update(elapsed)) {
+                this.deathAnim = null;
+            }
         }
         if (this.swimAnim) {
             if (this.swimAnim.update(elapsed)) {
                 this.swimAnim = null;
+            } else {
+                swim = false;
             }
-        } else if (swim) {
+        }
+
+        if (steer) {
+            this.angle += elapsed * steer * this.turnRate;
+        }
+        if (swim) {
             this.swimSounds[this.soundIndex].play();
             this.soundIndex = (this.soundIndex + 1) % this.swimSounds.length;
             var swimAngle = this.angle + Math.PI / 2;
@@ -74,9 +99,11 @@ var FISHTANK = (function () {
         }
 
         this.textureContext.clearRect(0, 0, this.textureCanvas.width, this.textureCanvas.height);
-        if (this.swimAnim) {
+        if (this.deathAnim) {
+            this.deathAnim.draw(this.textureContext, 256, 256, BLIT.ALIGN.Center, 400, 400);
+        } else if (this.swimAnim) {
             this.swimAnim.draw(this.textureContext, 256, 256, BLIT.ALIGN.Center, 240, 420);
-        } else {
+        } else if (this.alive) {
             this.idleAnim.update(animElapsed);
             this.idleAnim.draw(this.textureContext, 256, 256, BLIT.ALIGN.Center, 256, 256);
         }
@@ -96,21 +123,33 @@ var FISHTANK = (function () {
             collisionSizeSq = collisionSize * collisionSize,
             breaks = 0.005;
 
-        if (this.height > 0) {
+        if (!this.alive && !this.deathAnim && this.verticalVelocity > 0) {
+            this.verticalVelocity = 0;
+        } else if (this.height > 0) {
             this.verticalVelocity -= gravity * elapsed;
         } else {
             this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
         }
 
         for (var o = 0; o < obstacles.length; ++o) {
+            if (!this.alive) {
+                break;
+            }
             var obstacle = obstacles[o],
                 distanceSq = R3.pointDistanceSq(this.thing.position, obstacle.position);
 
             if (distanceSq < collisionSizeSq) {
+                console.log(obstacle.type);
                 if (obstacle.type === "obsSlow") {
                     this.radialVelocity -= this.radialVelocity * breaks * elapsed;
                     this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
-                } else {
+                } else if (obstacle.type === "obsStar") {
+                    
+                } else if (obstacle.type === "obsUrchin") {
+                    this.alive = false;
+                    this.deathSound.play();
+                    this.deathAnim = this.deathFlip.setupPlayback(40, false);
+                } else  {
                     var verticalOffset = this.height - obstacle.position.y,
                         obstacleAngle = Math.atan2(obstacle.z, obstacle.x),
                         angleOffset = R2.clampAngle(obstacleAngle - this.positionAngle);
@@ -128,7 +167,9 @@ var FISHTANK = (function () {
 
         var BOTTOM = -0.2,
             TOP = 8.3;
-        if (this.height < BOTTOM) {
+        if (this.height < 0 && !this.alive) {
+            this.reset();
+        } else if (this.height < BOTTOM) {
             this.height = BOTTOM;
             this.verticalVelocity = 0;
         } else if (this.height > TOP) {
