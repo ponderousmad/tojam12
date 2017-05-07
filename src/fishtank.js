@@ -189,12 +189,14 @@ var FISHTANK = (function () {
         this.loadingFile = 0;
         this.loadState = null;
 
-        this.files = ["images/can_do/half.json"];
+        this.files = ["images/tunabits/can.json"];
         this.jellyfish = null;
         this.cans = [];
         this.things = [];
         this.obstacles = [];
         this.urchins = [];
+
+        this.backgroundImages = [];
 
         this.gameStarted = false;
 
@@ -207,8 +209,12 @@ var FISHTANK = (function () {
             batch = new BLIT.Batch("images/", function() {
                 jellyfish.construct();
                 self.jellyfish = jellyfish;
+                self.setupBackgrounds();
             });
         urchinImage = batch.load("urchin.png");
+        this.backgroundImages.push(batch.load("bg.jpg"));
+        this.backgroundImages.push(batch.load("bg_layer1.png"));
+        this.backgroundImages.push(batch.load("bg_layer2.png"));
         jellyfish = new Jellyfish(batch);
         batch.commit();
     };
@@ -271,6 +277,10 @@ var FISHTANK = (function () {
             blump.simplify();
         }
         this.cans.push(can);
+    };
+
+    Tank.prototype.setupBackgrounds = function () {
+
     };
 
     Tank.prototype.finalize = function () {
