@@ -33,7 +33,7 @@ var FISHTANK = (function () {
         this.preventDefaultIO = true;
         this.viewport = viewport ? viewport : "canvas";
         this.program = null;
-        this.distance = 0.5;
+        this.distance = 1.5;
         this.zoom = 1;
         this.tilt = 0;
         this.towerRotation = 0;
@@ -44,7 +44,7 @@ var FISHTANK = (function () {
         this.loadingFile = 0;
         this.loadState = null;
 
-        this.files = ["images/test.json"];
+        this.files = ["images/can_do/test.json"];
         this.jellyfishImage = null;
         this.jellyfish = null;
         this.cans = [];
@@ -104,7 +104,7 @@ var FISHTANK = (function () {
         for (var c = 0; c < canCount; ++c) {
             var thing = new BLOB.Thing();
             thing.mesh = cans[c].mesh;
-            thing.move(new R3.V(0, yOffset, 0));
+            thing.move(new R3.V(0, 0, 0));
             this.things.push(thing);
             this.cans.push(thing);
             yOffset += ySize;
@@ -114,8 +114,8 @@ var FISHTANK = (function () {
             jellyfishCoords = jellyfishAtlas.add(this.jellyfishImage),
             jellyfishMesh = WGL.makeBillboard(jellyfishAtlas.texture(), jellyfishCoords);
         this.jellyfish = new BLOB.Thing(jellyfishMesh);
-        this.jellyfish.setPosition(new R3.V(0.2, 0, 0));
-        this.jellyfish.scaleBy(0.04);
+        this.jellyfish.setPosition(new R3.V(0.65, 0, 0));
+        this.jellyfish.scaleBy(0.12);
         this.jellyfish.setBillboardUp(new R3.V(0, 1, 0));
         this.things.push(this.jellyfish);
     };

@@ -1,0 +1,63 @@
+{
+    "pixelSize": 0.002,
+    "depthRange": 0.05,
+    "depthOffset": 0.6,
+    "blumps": [
+        {
+            "resource": "can_do/bump_hybrid_1.png",
+            "texture": "can_do/tuna_can_1.png",
+            "geometry": "cylinder",
+            "cylinderAngle": 45,
+            "angle": 0
+        },
+        {
+            "resource": "can_do/bump_hybrid_2.png",
+            "texture": "can_do/tuna_can_2.png",
+            "geometry": "cylinder",
+            "cylinderAngle": 45,
+            "angle": 45
+        },
+        {
+            "resource": "can_do/bump_hybrid_3.png",
+            "texture": "can_do/tuna_can_3.png",
+            "geometry": "cylinder",
+            "cylinderAngle": 45,
+            "angle": 90
+        },
+        {
+            "resource": "can_do/bump_hybrid_4.png",
+            "texture": "can_do/tuna_can_4.png",
+            "geometry": "cylinder",
+            "cylinderAngle": 45,
+            "angle": 135
+        },
+        {
+            "resource": "can_do/bump_hybrid_1.png",
+            "texture": "can_do/tuna_can_1.png",
+            "geometry": "cylinder",
+            "cylinderAngle": 45,
+            "angle": 180
+        },
+        {
+            "resource": "can_do/bump_hybrid_2.png",
+            "texture": "can_do/tuna_can_2.png",
+            "geometry": "cylinder",
+            "cylinderAngle": 45,
+            "angle": 225
+        },
+        {
+            "resource": "can_do/bump_hybrid_3.png",
+            "texture": "can_do/tuna_can_3.png",
+            "geometry": "cylinder",
+            "cylinderAngle": 45,
+            "angle": 270
+        },
+        {
+            "resource": "can_do/bump_hybrid_4.png",
+            "texture": "can_do/tuna_can_4.png",
+            "geometry": "cylinder",
+            "cylinderAngle": 45,
+            "angle": 315
+        }
+    ]
+}
