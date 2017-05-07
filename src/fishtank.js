@@ -38,9 +38,6 @@ var FISHTANK = (function () {
         this.tilt = 0;
         this.towerRotation = 0;
         this.TILT_MAX = Math.PI * 0.49;
-        this.drawAllCheckbox = document.getElementById("drawAll");
-        this.turntableCheckbox = document.getElementById("turntable");
-        this.turnRate = document.getElementById("sliderTurnRate");
         this.loadingFile = 0;
         this.loadState = null;
 
@@ -203,29 +200,16 @@ var FISHTANK = (function () {
             room.viewer.positionView(eye, R3.origin(), new R3.V(0, 1, 0));
             room.setupView(this.program, this.viewport);
             for (var t = 0; t < this.things.length; ++t) {
-                var thing = this.things[t];
-                if (thing.blumps && this.drawAllCheckbox ? this.drawAllCheckbox.checked : false) {
-                    var blumps = thing.blumps;
-                    thing.blumps = null;
-                    for (var b = 0; b < blumps.length; ++b) {
-                        thing.mesh = blumps[b].mesh;
-                        thing.render(room, this.program, eye);
-                    }
-                    thing.blumps = blumps;
-                } else {
-                    thing.render(room, this.program, eye);
-                }
+                this.things[t].render(room, this.program, eye);
             }
         }
     };
 
     function start() {
-        MAIN.start(document.getElementById("canvas3D"), new Tank("safe"));
-
-        MAIN.setupToggleControls();
         if (MAIN.runTestSuites() === 0) {
             console.log("All Tests Passed!");
         }
+        MAIN.start(document.getElementById("canvas3D"), new Tank("safe"));
     }
 
     return {

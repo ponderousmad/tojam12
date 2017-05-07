@@ -26,29 +26,6 @@
         <canvas id="canvas3D" width="500" height="600">
             Sorry, your browser doesn't support the &lt;canvas&gt; element.
         </canvas>
-        <div class="controls" id="controls">
-            <div class="menuBorder">
-                <div class="menuToggle">
-                    <a href="javascript:void(0)" id="menuButton"><div class="hamburger"></div></a>
-                </div>
-            </div>
-            <form>
-                <div>
-                    <span>Turntable: <input type="checkbox" id="turntable" /></span>
-                </div>
-                <div>
-                    <span>Draw All: <input type="checkbox" id="drawAll" /></span>
-                </div>
-                <div class="slider">
-                    <div>Turntable Speed:</div>
-                    <input class="linearSlider" id="sliderTurnRate" type="range" min="0.1" max= "5.0" step="0.001" value="1">
-                </div>
-                <div>
-                    <button id="enterVR" type="button" class="hidden">Enter VR</button>
-                    <button id="exitVR" type="button" class="hidden">Exit VR</button>
-                </div>
-            </form>
-        </div>
         <script type="text/javascript">
             window.onload = function(e) {
                 FISHTANK.start();
