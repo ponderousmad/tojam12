@@ -1,42 +1,72 @@
 var FISHTANK = (function () {
     "use strict";
 
-    function Jellyfish(mesh) {
-        this.thing = new BLOB.Thing(mesh);
-        this.thing.scaleBy(0.12);
+    function Jellyfish(batch) {
+        this.thing = null;
 
         this.angle = 0;
         this.height = 0;
         this.positionAngle = 0;
         this.verticalVelocity = 0;
         this.radialVelocity = 0;
-        this.idleFlipbook = null;
-        this.thrustFlipbook = null;
+        this.swimAnim = null;
         this.radialDistance = 0.7;
 
         this.turnRate = Math.PI * 0.001;
-        this.radialVelocityDecay = 0.001;
+        this.radialVelocityDecay = 0.000001;
         this.gravity = 0.000001;
-        this.thrustVelocity = 0.001;
+        this.swimVelocity = 0.001;
 
-        this.updatePosition();
+        this.idleAnim = new BLIT.Flip(batch, "jelly/idle_", 15, 5).setupPlayback(50, true);
+        this.swimFlip = new BLIT.Flip(batch, "jelly/swim_", 15, 5);
+
+        this.textureCanvas = null;
+        this.textureContext = null;
     }
 
-    Jellyfish.prototype.update = function (elapsed, thrust, steer) {
+    Jellyfish.prototype.construct = function () {
+        this.textureCanvas = document.createElement('canvas');
+        this.textureContext = this.textureCanvas.getContext('2d');
+        this.textureCanvas.width = this.textureCanvas.height = 512;
+        var coords = { uMin: 0, vMin: 0, uSize: 1, vSize: 1 }
+
+        this.thing = new BLOB.Thing(WGL.makeBillboard(this.textureCanvas, coords));
+        this.thing.scaleBy(0.12);
+
+        this.updatePosition();
+        return this.thing
+    }
+
+    Jellyfish.prototype.update = function (elapsed, swim, steer) {
         if (steer) {
             this.angle += elapsed * steer * this.turnRate;
         }
-        if (thrust) {
-            var thrustAngle = this.angle + Math.PI / 2;
-            this.verticalVelocity += Math.sin(thrustAngle) * this.thrustVelocity;
-            this.radialVelocity -= Math.cos(thrustAngle) * this.thrustVelocity / this.radialDistance;
+        if (this.swimAnim) {
+            if (this.swimAnim.update(elapsed)) {
+                this.swimAnim = null;
+            }
+        } else if (swim) {
+            var swimAngle = this.angle + Math.PI / 2;
+            this.verticalVelocity += Math.sin(swimAngle) * this.swimVelocity;
+            this.radialVelocity -= Math.cos(swimAngle) * this.swimVelocity / this.radialDistance;
+            this.swimAnim = this.swimFlip.setupPlayback(20, false);
         }
+        
+        this.textureContext.clearRect(0, 0, this.textureCanvas.width, this.textureCanvas.height);
+        if (this.swimAnim) {
+            this.swimAnim.draw(this.textureContext, 0, 0, BLIT.ALIGN.TopLeft);
+        } else {
+            this.idleAnim.update(elapsed);
+            this.idleAnim.draw(this.textureContext, 0, 0, BLIT.ALIGN.TopLeft);
+        }
+        this.thing.mesh.updatedTexture = true;
 
         var direction = Math.sign(this.radialVelocity);
-
-        this.radialVelocity - elapsed * this.radialVelocityDecay;
-        if (Math.sign(this.radialVelocity) !== direction) {
-            this.radialVelocity = 0;
+        if (direction) {
+            this.radialVelocity -= direction * elapsed * this.radialVelocityDecay;
+            if (Math.sign(this.radialVelocity) !== direction) {
+                this.radialVelocity = 0;
+            }
         }
 
         this.positionAngle += this.radialVelocity * elapsed;
@@ -76,7 +106,6 @@ var FISHTANK = (function () {
         this.loadState = null;
 
         this.files = ["images/can_do/test.json"];
-        this.jellyfishImage = null;
         this.jellyfish = null;
         this.cans = [];
         this.things = null;
@@ -104,7 +133,7 @@ var FISHTANK = (function () {
         for (var b = 0; b < blumps.length; ++b) {
             blumps[b].loadImage(batch);
         }
-        this.jellyfishImage = batch.load("jelly.png");
+        this.jellyfish = new Jellyfish(batch);
         batch.commit();
     };
 
@@ -143,11 +172,7 @@ var FISHTANK = (function () {
             yOffset += ySize;
         }
 
-        var jellyfishAtlas = new WGL.TextureAtlas(this.jellyfishImage.width, this.jellyfishImage.height, 1),
-            jellyfishCoords = jellyfishAtlas.add(this.jellyfishImage),
-            jellyfishMesh = WGL.makeBillboard(jellyfishAtlas.texture(), jellyfishCoords);
-        this.jellyfish = new Jellyfish(jellyfishMesh);
-        this.things.push(this.jellyfish.thing);
+        this.things.push(this.jellyfish.construct());
     };
 
     Tank.prototype.setupRoom = function (room) {
@@ -172,31 +197,25 @@ var FISHTANK = (function () {
                     self.batch(data);
                 });
             }
-        }
-        if (this.cans) {
-        }
+        } else {
+            var swim = false,
+                steer = 0;
 
-        var thrust = false,
-            steer = 0;
-
-        if (keyboard.wasKeyPressed(IO.KEYS.Space)) {
-            if (this.jellyfish && !this.gameStarted) {
-                this.gameStarted = true;
-            } else {
-                thrust = true;
+            if (keyboard.wasKeyPressed(IO.KEYS.Space)) {
+                if (!this.gameStarted) {
+                    this.gameStarted = true;
+                } else {
+                    swim = true;
+                }
             }
-        }
-        if (keyboard.isKeyDown(IO.KEYS.Left) || keyboard.isAsciiDown("A")) {
-            steer = 1;
-        }
-        if (keyboard.isKeyDown(IO.KEYS.Right) || keyboard.isAsciiDown("D")) {
-            steer = -1;
-        }
-
-        if (this.jellyfish) {
-            if (this.gameStarted) {
-                this.jellyfish.update(elapsed, thrust, steer);
+            if (keyboard.isKeyDown(IO.KEYS.Left) || keyboard.isAsciiDown("A")) {
+                steer = 1;
             }
+            if (keyboard.isKeyDown(IO.KEYS.Right) || keyboard.isAsciiDown("D")) {
+                steer = -1;
+            }
+
+            this.jellyfish.update(this.gameStarted ? elapsed : 0, swim, steer);
             this.towerRotation = this.jellyfish.positionAngle;
             this.eyeHeight = this.jellyfish.height;
         }
