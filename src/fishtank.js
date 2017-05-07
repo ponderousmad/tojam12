@@ -145,7 +145,7 @@ var FISHTANK = (function () {
                     this.radialVelocity -= this.radialVelocity * breaks * elapsed;
                     this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
                 } else if (obstacle.type === "obsStar") {
-                    if (!obstacle.thing.collected) {
+                    if (obstacle.thing && !obstacle.thing.collected) {
                         obstacle.thing.collected = true;
                         this.pickupSound.play();
                     }
@@ -379,7 +379,7 @@ var FISHTANK = (function () {
     Tank.prototype.finalize = function () {
         console.log("Load completed!");
         var hOffset = -.5,
-            angles = [58, 30, 270, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58, 180, 90];
+            angles = [58, 30, 270, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58];
 
         for (var c = 0; c < this.cans.length; ++c) {
             for (var a = 0; a < angles.length; ++a) {
@@ -393,6 +393,9 @@ var FISHTANK = (function () {
             if (obstacle.type === "obsUrchin") {
                 var thing = new BLOB.Thing(WGL.makeBillboard(this.urchinCanvas, WGL.uvFill())),
                     pos = obstacle.position.copy();
+                if (pos.y < 0) {
+                    continue;
+                }
                 pos.x *= 1.2;
                 pos.z *= 1.2;
                 thing.setPosition(pos);
@@ -403,6 +406,9 @@ var FISHTANK = (function () {
             if (obstacle.type === "obsStar") {
                 var thing = new BLOB.Thing(WGL.makeBillboard(this.starCanvas, WGL.uvFill())),
                     pos = obstacle.position.copy();
+                if (pos.y < 0) {
+                    continue;
+                }
                 pos.x *= 1.1;
                 pos.z *= 1.1;
                 thing.setPosition(pos);
