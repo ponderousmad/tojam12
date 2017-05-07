@@ -37,7 +37,11 @@ var FISHTANK = (function () {
         return this.thing
     }
 
-    Jellyfish.prototype.update = function (elapsed, swim, steer) {
+    Jellyfish.prototype.update = function (started, elapsed, swim, steer) {
+        var animElapsed = elapsed;
+        if (!started) {
+            elapsed = 0;
+        }
         if (steer) {
             this.angle += elapsed * steer * this.turnRate;
         }
@@ -51,12 +55,12 @@ var FISHTANK = (function () {
             this.radialVelocity -= Math.cos(swimAngle) * this.swimVelocity / this.radialDistance;
             this.swimAnim = this.swimFlip.setupPlayback(20, false);
         }
-        
+
         this.textureContext.clearRect(0, 0, this.textureCanvas.width, this.textureCanvas.height);
         if (this.swimAnim) {
             this.swimAnim.draw(this.textureContext, 0, 0, BLIT.ALIGN.TopLeft);
         } else {
-            this.idleAnim.update(elapsed);
+            this.idleAnim.update(animElapsed);
             this.idleAnim.draw(this.textureContext, 0, 0, BLIT.ALIGN.TopLeft);
         }
         this.thing.mesh.updatedTexture = true;
@@ -88,6 +92,42 @@ var FISHTANK = (function () {
         this.thing.setBillboardUp(R3.makeRotateQ(qTurn).transformV(new R3.V(0, 1, 0)));
     };
 
+    function Obstacle(position, type) {
+        this.position = position;
+        this.type = type;
+    }
+
+    Obstacle.prototype.place = function (transform) {
+        return new Obstacle(transform.transformP(this.position), this.type);
+    }
+
+    function Can(resource, blumps, height) {
+        this.resource = resource;
+        this.blumps = blumps;
+        this.obstacles = [];
+        this.height = height;
+    }
+
+    Can.prototype.place = function (heightOffset, angleOffset, things, obstacles) {
+        var offset = new R3.V(0, heightOffset, 0);
+        for (var b = 0; b < this.blumps.length; ++b) {
+            var blump = this.blumps[b],
+                thing = new BLOB.Thing();
+            thing.mesh = blump.mesh;
+            thing.move(offset);
+            thing.rotate(angleOffset, new R3.V(0, 1, 0));
+            things.push(thing);
+        }
+
+        var transform = R3.makeRotateY(angleOffset);
+        transform.translate(offset)
+
+        for (var o = 0; o < this.obstacles.length; ++o) {
+            obstacles.push(this.obstacles[o].place(transform));
+        }
+        return heightOffset + this.height;
+    }
+
     function Tank(viewport, editor) {
         this.clearColor = [0, 0, 0, 1];
         this.maximize = viewport === "safe";
@@ -105,74 +145,106 @@ var FISHTANK = (function () {
         this.loadingFile = 0;
         this.loadState = null;
 
-        this.files = ["images/can_do/test.json"];
+        this.files = ["images/can_do/half.json"];
         this.jellyfish = null;
         this.cans = [];
-        this.things = null;
-        this.canHeight = null;
+        this.things = [];
+        this.obstacles = [];
 
         this.gameStarted = false;
+
+        this.batchAnimations();
     }
 
-    Tank.prototype.batch = function (blumpData) {
+    Tank.prototype.batchAnimations = function () {
+        var self = this,
+            jellyfish = null,
+            batch = new BLIT.Batch("images/", function() {
+                jellyfish.construct();
+                self.jellyfish = jellyfish;
+            });
+        jellyfish = new Jellyfish(batch);
+        batch.commit();
+    };
+
+    Tank.prototype.batchCan = function (resource, blumpData) {
         this.loadState = "batching";
 
-        var blumps = [],
-            pixelSize = blumpData.pixelSize || 0.001,
-            depthRange = blumpData.depthRange || 0.2,
-            depthOffset = blumpData.depthOffset || 0.1;
+        var blumps = [];
         for (var d = 0; d < blumpData.blumps.length; ++d) {
-            blumps.push(new BLUMP.Blump(blumpData.blumps[d], pixelSize, depthRange,  depthOffset));
+            var blump = new BLUMP.Blump(
+                blumpData.blumps[d],
+                blumpData.pixelSize || 0.001,
+                blumpData.depthRange || 0.2,
+                blumpData.depthOffset || 0.1,
+                BLIT.ALIGN.Bottom
+            );
+            blumps.push(blump);
         }
 
         var self = this,
             batch = new BLIT.Batch("images/", function() {
-                self.constructBlumps(blumps);
+                self.constructBlumps(resource, blumps);
             });
 
         for (var b = 0; b < blumps.length; ++b) {
-            blumps[b].loadImage(batch);
+            blumps[b].batch(batch);
         }
-        this.jellyfish = new Jellyfish(batch);
         batch.commit();
     };
 
-    Tank.prototype.constructBlumps = function (blumps) {
+    Tank.prototype.constructBlumps = function (resource, blumps) {
         this.loadState = "constructing";
         var image = blumps[0].image,
             atlas = blumps[0].constructAtlas(blumps.length);
-        if (this.canHeight === null) {
-            this.canHeight = image.height;
-        }
+
         for (var b = 0; b < blumps.length; ++b) {
             blumps[b].construct(atlas, false, false);
-            blumps[b].image = null;
         }
+        this.setupCan(resource, blumps);
+
         this.loadState = null;
         this.loadingFile += 1;
 
-        if (this.loadingFile == this.files.length) {
-            this.setupCans(blumps);
+        if (this.loadingFile === this.files.length) {
+            this.finalize();
         }
     };
 
-    Tank.prototype.setupCans = function (cans) {
-        this.cans = []
-        this.things = [];
-
-        var canCount = cans.length,
-            ySize = this.canHeight * cans[0].pixelSize,
-            yOffset = -0.5 * canCount * ySize;
-        for (var c = 0; c < canCount; ++c) {
-            var thing = new BLOB.Thing();
-            thing.mesh = cans[c].mesh;
-            thing.move(new R3.V(0, 0, 0));
-            this.things.push(thing);
-            this.cans.push(thing);
-            yOffset += ySize;
+    Tank.prototype.setupCan = function (resource, blumps) {
+        var can = new Can(resource, blumps, blumps[0].height() * blumps[0].pixelSize);
+        for (var b = 0; b < blumps.length; ++b) {
+            var blump = blumps[b];
+            for (var p = 0; p < blump.pointsOfInterest.length; ++p) {
+                var poi = blump.pointsOfInterest[p];
+                if (poi.type.slice(0,3) === "obs") {
+                    var position = poi.localPoint.copy();
+                    can.obstacles.push(new Obstacle(position, poi.type));
+                }
+            }
+            blump.simplify();
         }
+        this.cans.push(can);
+    };
 
-        this.things.push(this.jellyfish.construct());
+    Tank.prototype.finalize = function () {
+        console.log("Load completed!");
+        var hOffset = 0,
+            angles = [30, 270, 58, 180, 90];
+
+        for (var c = 0; c < this.cans.length; ++c) {
+            for (var a = 0; a < angles.length; ++a) {
+                var angle = angles[a] * R2.DEG_TO_RAD;
+                hOffset = this.cans[c].place(hOffset, angle, this.things, this.obstacles);
+            }
+        }
+ /*
+        for (var o = 0; o < this.obstacles.length; ++o) {
+            var thing = new BLOB.Thing(WGL.makeCube(0.1, true));
+            thing.setPosition(this.obstacles[o].position);
+            this.things.push(thing);
+        }
+        */
     };
 
     Tank.prototype.setupRoom = function (room) {
@@ -189,18 +261,18 @@ var FISHTANK = (function () {
         if (elapsed > 100) {
             elapsed = 100;
         }
+        var swim = false,
+            steer = 0;
         if (this.loadingFile < this.files.length) {
             if (this.loadState === null) {
                 this.loadState = "setup";
-                var self = this;
-                IO.downloadJSON(this.files[this.loadingFile], function (data) {
-                    self.batch(data);
+                var self = this,
+                    resource = this.files[this.loadingFile];
+                IO.downloadJSON(resource, function (data) {
+                    self.batchCan(resource, data);
                 });
             }
         } else {
-            var swim = false,
-                steer = 0;
-
             if (keyboard.wasKeyPressed(IO.KEYS.Space)) {
                 if (!this.gameStarted) {
                     this.gameStarted = true;
@@ -215,22 +287,16 @@ var FISHTANK = (function () {
                 steer = -1;
             }
 
-            this.jellyfish.update(this.gameStarted ? elapsed : 0, swim, steer);
-            this.towerRotation = this.jellyfish.positionAngle;
-            this.eyeHeight = this.jellyfish.height;
-        }
-
-        if (this.things) {
-            var animRate = (this.animRate ? parseFloat(this.animRate.value) : null) || 1;
             for (var t = 0; t < this.things.length; ++t) {
                 var thing = this.things[t];
-                thing.update(elapsed * animRate);
+                thing.update(elapsed);
             }
         }
 
-        if (pointer.wheelY) {
-            var WHEEL_BASE = 20;
-            this.zoom *= (WHEEL_BASE + pointer.wheelY) / WHEEL_BASE;
+        if (this.jellyfish) {
+            this.jellyfish.update(this.gameStarted, elapsed, swim, steer);
+            this.towerRotation = this.jellyfish.positionAngle;
+            this.eyeHeight = this.jellyfish.height;
         }
     };
 
@@ -246,12 +312,19 @@ var FISHTANK = (function () {
 
     Tank.prototype.render = function (room, width, height) {
         room.clear(this.clearColor);
-        if (this.things && room.viewer.showOnPrimary()) {
+        if (room.viewer.showOnPrimary()) {
             var eye = this.eyePosition();
             room.viewer.positionView(eye, new R3.V(0, this.eyeHeight, 0), new R3.V(0, 1, 0));
             room.setupView(this.program, this.viewport);
             for (var t = 0; t < this.things.length; ++t) {
-                this.things[t].render(room, this.program, eye);
+                var thing = this.things[t];
+                if (Math.abs(thing.position.y - eye.y) < 1) {
+                    thing.render(room, this.program, eye);
+                }
+            }
+            // Need to draw billboards last for alpha blending to work.
+            if (this.jellyfish) {
+                this.jellyfish.thing.render(room, this.program, eye);
             }
         }
     };

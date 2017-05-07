@@ -1,88 +1,88 @@
 {
-    "pixelSize": 0.002,
+    "pixelSize": 0.004,
     "depthRange": 0.08,
     "depthOffset": 0.6,
     "blumps": [
         {
-            "resource": "can_do/bump_hybrid_1.png",
+            "resource": "can_do/bump_half_1.png",
             "texture": "can_do/tuna_can_1.png",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 0
         },
         {
-            "resource": "can_do/bump_hybrid_2.png",
+            "resource": "can_do/bump_half_2.png",
             "texture": "can_do/tuna_can_2.png",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 45,
             "POIs" : [
                 {
-                    "x": 47,
-                    "y": 126,
+                    "x": 23,
+                    "y": 63,
                     "type": "obstacle"
                 }
             ]
         },
         {
-            "resource": "can_do/bump_hybrid_3.png",
+            "resource": "can_do/bump_half_3.png",
             "texture": "can_do/tuna_can_3.png",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 90
         },
         {
-            "resource": "can_do/bump_hybrid_4.png",
+            "resource": "can_do/bump_half_4.png",
             "texture": "can_do/tuna_can_4.png",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 135,
             "POIs" : [
                 {
-                    "x": 33,
-                    "y": 126,
+                    "x": 16,
+                    "y": 63,
                     "type": "obstacle"
                 }
             ]
         },
         {
-            "resource": "can_do/bump_hybrid_1.png",
+            "resource": "can_do/bump_half_1.png",
             "texture": "can_do/tuna_can_1.png",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 180
         },
         {
-            "resource": "can_do/bump_hybrid_2.png",
+            "resource": "can_do/bump_half_2.png",
             "texture": "can_do/tuna_can_2.png",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 225,
             "POIs" : [
                 {
-                    "x": 47,
-                    "y": 126,
+                    "x": 23,
+                    "y": 63,
                     "type": "obstacle"
                 }
             ]
         },
         {
-            "resource": "can_do/bump_hybrid_3.png",
+            "resource": "can_do/bump_half_3.png",
             "texture": "can_do/tuna_can_3.png",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 270
         },
         {
-            "resource": "can_do/bump_hybrid_4.png",
+            "resource": "can_do/bump_half_4.png",
             "texture": "can_do/tuna_can_4.png",
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "angle": 315,
             "POIs" : [
                 {
-                    "x": 33,
-                    "y": 126,
+                    "x": 16,
+                    "y": 63,
                     "type": "obstacle"
                 }
             ]
