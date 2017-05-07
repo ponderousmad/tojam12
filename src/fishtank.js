@@ -75,8 +75,18 @@ var FISHTANK = (function () {
 
         this.positionAngle += this.radialVelocity * elapsed;
 
-        this.verticalVelocity -= this.gravity * elapsed;
+        if (this.height > 0) {
+            this.verticalVelocity -= this.gravity * elapsed;
+        } else {
+            this.verticalVelocity -= this.verticalVelocity * 0.1;
+        }
         this.height += this.verticalVelocity * elapsed;
+
+        var BOTTOM = -0.2;
+        if (this.height < BOTTOM) {
+            this.height = BOTTOM;
+            this.verticalVelocity = 0;
+        }
 
         this.updatePosition();
     };
@@ -238,13 +248,12 @@ var FISHTANK = (function () {
                 hOffset = this.cans[c].place(hOffset, angle, this.things, this.obstacles);
             }
         }
- /*
+
         for (var o = 0; o < this.obstacles.length; ++o) {
             var thing = new BLOB.Thing(WGL.makeCube(0.1, true));
             thing.setPosition(this.obstacles[o].position);
             this.things.push(thing);
         }
-        */
     };
 
     Tank.prototype.setupRoom = function (room) {
