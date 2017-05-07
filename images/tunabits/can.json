@@ -18,8 +18,8 @@
             "angle": 45,
             "POIs" : [
                 {
-                    "x": 25,
-                    "y": 265,
+                    "x": 10,
+                    "y": 70,
                     "type": "obstacle"
                 }
             ]
@@ -29,11 +29,11 @@
             "texture": "tunabits/tuna_col3.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
-            "angle": 90
+            "angle": 90,
 			"POIs" : [
                 {
-                    "x": 477,
-                    "y": 212,
+                    "x": 119,
+                    "y": 54,
                     "type": "obstacle"
                 }
             ]
@@ -43,7 +43,7 @@
             "texture": "tunabits/tuna_col4.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
-            "angle": 135,
+            "angle": 135
         },
         {
             "resource": "tunabits/tuna_depth1.png",
@@ -60,8 +60,8 @@
             "angle": 225,
             "POIs" : [
                 {
-                    "x": 25,
-                    "y": 265,
+                    "x": 10,
+                    "y": 70,
                     "type": "obstacle"
                 }
             ]
@@ -71,11 +71,11 @@
             "texture": "tunabits/tuna_col3.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
-            "angle": 270
+            "angle": 270,
 			"POIs" : [
                 {
-                    "x": 477,
-                    "y": 212,
+                    "x": 119,
+                    "y": 54,
                     "type": "obstacle"
                 }
             ]
@@ -85,7 +85,7 @@
             "texture": "tunabits/tuna_col4.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
-            "angle": 315,
+            "angle": 315
         }
     ]
 }
