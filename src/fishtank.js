@@ -1,7 +1,32 @@
 var FISHTANK = (function () {
     "use strict";
 
-        function Tank(viewport, editor) {
+    function Jellyfish() {
+        this.thing = null;
+        this.angle = 0;
+        this.height = 0;
+        this.radialPosition = 0;
+        this.verticalVelocity = 0;
+        this.radialVelocity = 0;
+        this.idleFlipbook = null;
+        this.thrustFlipbook = null;
+
+        this.turnRate = Math.PI * 0.001;
+        this.radialVelocityDecay = 0.001;
+        this.gravity = 0.01;
+    }
+
+    Jellyfish.prototype.update = function (elapsed, thrust, steer) {
+        if (steer) {
+            this.angle += elapsed * steer * this.turnRate;
+        }
+
+        this.radialVelocity = Math.max(0, this.radialVelocity - elapsed * this.radialVelocityDecay);
+        this.radialVelocity -= elapsed * this.radialVelocityDecay;
+        this.radialPosition += thils.radialVelocity * elapsed;
+    }
+
+    function Tank(viewport, editor) {
         this.clearColor = [0, 0, 0, 1];
         this.maximize = viewport === "safe";
         this.updateInDraw = true;
@@ -20,7 +45,8 @@ var FISHTANK = (function () {
         this.loadState = null;
 
         this.files = ["images/test.json"];
-        this.billboardImage = null;
+        this.jellyfishImage = null;
+        this.jellyfish = null;
         this.cans = [];
         this.things = null;
         this.canHeight = null;
@@ -45,7 +71,7 @@ var FISHTANK = (function () {
         for (var b = 0; b < blumps.length; ++b) {
             blumps[b].loadImage(batch);
         }
-        this.billboardImage = batch.load("../blitblort/images/uv.png");
+        this.jellyfishImage = batch.load("jelly.png");
         batch.commit();
     };
 
@@ -84,14 +110,14 @@ var FISHTANK = (function () {
             yOffset += ySize;
         }
 
-        var billboardAtlas = new WGL.TextureAtlas(this.billboardImage.width, this.billboardImage.height, 1),
-            billboardCoords = billboardAtlas.add(this.billboardImage),
-            billboardMesh = WGL.makeBillboard(billboardAtlas.texture(), billboardCoords);
-        this.billboard = new BLOB.Thing(billboardMesh);
-        this.billboard.setPosition(new R3.V(0.2, 0, 0));
-        this.billboard.scaleBy(0.04);
-        this.billboard.setBillboardUp(new R3.V(0, 1, 0));
-        this.things.push(this.billboard);
+        var jellyfishAtlas = new WGL.TextureAtlas(this.jellyfishImage.width, this.jellyfishImage.height, 1),
+            jellyfishCoords = jellyfishAtlas.add(this.jellyfishImage),
+            jellyfishMesh = WGL.makeBillboard(jellyfishAtlas.texture(), jellyfishCoords);
+        this.jellyfish = new BLOB.Thing(jellyfishMesh);
+        this.jellyfish.setPosition(new R3.V(0.2, 0, 0));
+        this.jellyfish.scaleBy(0.04);
+        this.jellyfish.setBillboardUp(new R3.V(0, 1, 0));
+        this.things.push(this.jellyfish);
     };
 
     Tank.prototype.setupRoom = function (room) {
@@ -100,6 +126,8 @@ var FISHTANK = (function () {
         room.viewer.near = 0.01;
         room.viewer.far = 10;
         room.gl.enable(room.gl.CULL_FACE);
+        room.gl.blendFunc(room.gl.SRC_ALPHA, room.gl.ONE_MINUS_SRC_ALPHA);
+        room.gl.enable(room.gl.BLEND);
     };
 
     Tank.prototype.update = function (now, elapsed, keyboard, pointer) {
@@ -115,11 +143,25 @@ var FISHTANK = (function () {
         if (this.cans) {
         }
 
-        if (this.billboard) {
-            var turnRate = (this.turnRate ? parseFloat(this.turnRate.value) : null) || 1,
-                billboardAngleDelta = elapsed * Math.PI * 0.001 * turnRate,
-                m = R3.makeRotateQ(R3.angleAxisQ(billboardAngleDelta, new R3.V(1, 0, 0)));
-            //this.billboard.setBillboardUp(m.transformV(this.billboard.billboardUp));
+        var forward = false,
+            steer = 0;
+
+        if (keyboard.wasKeyPressed(IO.KEYS.Space)) {
+            forward = true;
+        }
+        if (keyboard.isKeyDown(IO.KEYS.Left) || keyboard.isAltDown("A")) {
+            steer = 1;
+        }
+        if (keyboard.isKeyDown(IO.KEYS.Right) || keyboard.isAltDown("D")) {
+            steer = -1;
+        }
+
+        if (this.jellyfish) {
+            if (steer) {
+                var jellyfishAngleDelta = elapsed * Math.PI * 0.001 * steer,
+                    m = R3.makeRotateQ(R3.angleAxisQ(jellyfishAngleDelta, new R3.V(1, 0, 0)));
+                this.jellyfish.setBillboardUp(m.transformV(this.jellyfish.billboardUp));
+            }
         }
 
         if (this.things) {
