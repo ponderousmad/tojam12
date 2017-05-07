@@ -21,6 +21,11 @@
                     "x": 10,
                     "y": 70,
                     "type": "obstacle"
+                },
+				{
+                    "x": 125,
+                    "y": 75,
+                    "type": "obsStar"
                 }
             ]
         },
@@ -43,7 +48,13 @@
             "texture": "tunabits/tuna_col4.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
-            "angle": 135
+            "angle": 135,
+			"POIs" : [
+				{
+                    "x": 125,
+                    "y": 75,
+                    "type": "obsStar"
+				}
         },
         {
             "resource": "tunabits/tuna_depth1.png",
@@ -90,7 +101,13 @@
             "texture": "tunabits/tuna_col4.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
-            "angle": 315
+            "angle": 315,
+			"POIs" : [
+				{
+                    "x": 125,
+                    "y": 75,
+                    "type": "obsStar"
+				}
         }
     ]
 }
