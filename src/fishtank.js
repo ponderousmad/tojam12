@@ -1,30 +1,62 @@
 var FISHTANK = (function () {
     "use strict";
 
-    function Jellyfish() {
-        this.thing = null;
+    function Jellyfish(mesh) {
+        this.thing = new BLOB.Thing(mesh);
+        this.thing.scaleBy(0.12);
+
         this.angle = 0;
         this.height = 0;
-        this.radialPosition = 0;
+        this.positionAngle = 0;
         this.verticalVelocity = 0;
         this.radialVelocity = 0;
         this.idleFlipbook = null;
         this.thrustFlipbook = null;
+        this.radialDistance = 0.7;
 
         this.turnRate = Math.PI * 0.001;
         this.radialVelocityDecay = 0.001;
-        this.gravity = 0.01;
+        this.gravity = 0.000001;
+        this.thrustVelocity = 0.001;
+
+        this.updatePosition();
     }
 
     Jellyfish.prototype.update = function (elapsed, thrust, steer) {
         if (steer) {
             this.angle += elapsed * steer * this.turnRate;
         }
+        if (thrust) {
+            var thrustAngle = this.angle + Math.PI / 2;
+            this.verticalVelocity += Math.sin(thrustAngle) * this.thrustVelocity;
+            this.radialVelocity -= Math.cos(thrustAngle) * this.thrustVelocity / this.radialDistance;
+        }
 
-        this.radialVelocity = Math.max(0, this.radialVelocity - elapsed * this.radialVelocityDecay);
-        this.radialVelocity -= elapsed * this.radialVelocityDecay;
-        this.radialPosition += thils.radialVelocity * elapsed;
-    }
+        var direction = Math.sign(this.radialVelocity);
+
+        this.radialVelocity - elapsed * this.radialVelocityDecay;
+        if (Math.sign(this.radialVelocity) !== direction) {
+            this.radialVelocity = 0;
+        }
+
+        this.positionAngle += this.radialVelocity * elapsed;
+
+        this.verticalVelocity -= this.gravity * elapsed;
+        this.height += this.verticalVelocity * elapsed;
+
+        this.updatePosition();
+    };
+
+    Jellyfish.prototype.updatePosition = function () {
+        var x = Math.cos(this.positionAngle),
+            z = Math.sin(this.positionAngle);
+        this.thing.setPosition(new R3.V(x * this.radialDistance, this.height, z * this.radialDistance));
+
+        var qTilt = R3.angleAxisQ(this.angle, new R3.V(1, 0, 0)),
+            qTurn = R3.angleAxisQ(-this.positionAngle, new R3.V(0, 1, 0));
+        qTurn.times(qTilt);
+        this.thing.setBillboardUp(R3.makeRotateQ(qTurn).transformV(new R3.V(0, 1, 0)));
+    };
 
     function Tank(viewport, editor) {
         this.clearColor = [0, 0, 0, 1];
@@ -38,6 +70,8 @@ var FISHTANK = (function () {
         this.tilt = 0;
         this.towerRotation = 0;
         this.TILT_MAX = Math.PI * 0.49;
+        this.eyeHeight = 0;
+
         this.loadingFile = 0;
         this.loadState = null;
 
@@ -47,6 +81,8 @@ var FISHTANK = (function () {
         this.cans = [];
         this.things = null;
         this.canHeight = null;
+
+        this.gameStarted = false;
     }
 
     Tank.prototype.batch = function (blumpData) {
@@ -110,11 +146,8 @@ var FISHTANK = (function () {
         var jellyfishAtlas = new WGL.TextureAtlas(this.jellyfishImage.width, this.jellyfishImage.height, 1),
             jellyfishCoords = jellyfishAtlas.add(this.jellyfishImage),
             jellyfishMesh = WGL.makeBillboard(jellyfishAtlas.texture(), jellyfishCoords);
-        this.jellyfish = new BLOB.Thing(jellyfishMesh);
-        this.jellyfish.setPosition(new R3.V(0.65, 0, 0));
-        this.jellyfish.scaleBy(0.12);
-        this.jellyfish.setBillboardUp(new R3.V(0, 1, 0));
-        this.things.push(this.jellyfish);
+        this.jellyfish = new Jellyfish(jellyfishMesh);
+        this.things.push(this.jellyfish.thing);
     };
 
     Tank.prototype.setupRoom = function (room) {
@@ -128,6 +161,9 @@ var FISHTANK = (function () {
     };
 
     Tank.prototype.update = function (now, elapsed, keyboard, pointer) {
+        if (elapsed > 100) {
+            elapsed = 100;
+        }
         if (this.loadingFile < this.files.length) {
             if (this.loadState === null) {
                 this.loadState = "setup";
@@ -140,25 +176,29 @@ var FISHTANK = (function () {
         if (this.cans) {
         }
 
-        var forward = false,
+        var thrust = false,
             steer = 0;
 
         if (keyboard.wasKeyPressed(IO.KEYS.Space)) {
-            forward = true;
+            if (this.jellyfish && !this.gameStarted) {
+                this.gameStarted = true;
+            } else {
+                thrust = true;
+            }
         }
-        if (keyboard.isKeyDown(IO.KEYS.Left) || keyboard.isAltDown("A")) {
+        if (keyboard.isKeyDown(IO.KEYS.Left) || keyboard.isAsciiDown("A")) {
             steer = 1;
         }
-        if (keyboard.isKeyDown(IO.KEYS.Right) || keyboard.isAltDown("D")) {
+        if (keyboard.isKeyDown(IO.KEYS.Right) || keyboard.isAsciiDown("D")) {
             steer = -1;
         }
 
         if (this.jellyfish) {
-            if (steer) {
-                var jellyfishAngleDelta = elapsed * Math.PI * 0.001 * steer,
-                    m = R3.makeRotateQ(R3.angleAxisQ(jellyfishAngleDelta, new R3.V(1, 0, 0)));
-                this.jellyfish.setBillboardUp(m.transformV(this.jellyfish.billboardUp));
+            if (this.gameStarted) {
+                this.jellyfish.update(elapsed, thrust, steer);
             }
+            this.towerRotation = this.jellyfish.positionAngle;
+            this.eyeHeight = this.jellyfish.height;
         }
 
         if (this.things) {
@@ -167,14 +207,6 @@ var FISHTANK = (function () {
                 var thing = this.things[t];
                 thing.update(elapsed * animRate);
             }
-        }
-
-        if (pointer.primary) {
-            this.tilt += pointer.primary.deltaY * 0.5 * R2.DEG_TO_RAD;
-            this.tilt = R2.clamp(this.tilt, -this.TILT_MAX, this.TILT_MAX);
-
-            var angleDelta =  pointer.primary.deltaX * 0.01;
-            this.towerRotation += angleDelta;
         }
 
         if (pointer.wheelY) {
@@ -190,14 +222,14 @@ var FISHTANK = (function () {
             y = Math.sin(this.tilt),
             z = Math.sin(this.towerRotation) * hOffset;
 
-        return new R3.V(x * d, y * d, z * d);
+        return new R3.V(x * d, y * d + this.eyeHeight, z * d);
     };
 
     Tank.prototype.render = function (room, width, height) {
         room.clear(this.clearColor);
         if (this.things && room.viewer.showOnPrimary()) {
             var eye = this.eyePosition();
-            room.viewer.positionView(eye, R3.origin(), new R3.V(0, 1, 0));
+            room.viewer.positionView(eye, new R3.V(0, this.eyeHeight, 0), new R3.V(0, 1, 0));
             room.setupView(this.program, this.viewport);
             for (var t = 0; t < this.things.length; ++t) {
                 this.things[t].render(room, this.program, eye);
