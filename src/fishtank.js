@@ -1,7 +1,10 @@
 var FISHTANK = (function () {
     "use strict";
 
-    var urchinImage = null;
+    var urchinImage = null,
+        gravitySlider = null,
+        velocitySlider = null,
+        dragSlider = null;
 
     function Jellyfish(batch) {
         this.thing = null;
@@ -39,7 +42,10 @@ var FISHTANK = (function () {
     }
 
     Jellyfish.prototype.update = function (started, elapsed, swim, steer, obstacles) {
-        var animElapsed = elapsed;
+        var animElapsed = elapsed,
+            gravity = this.gravity * parseFloat(gravitySlider.value) / 100,
+            velocity = this.swimVelocity * parseFloat(velocitySlider.value) / 100,
+            velocityDrag = this.radialVelocityDecay * parseFloat(dragSlider.value) / 100;
         if (!started) {
             elapsed = 0;
         }
@@ -52,8 +58,8 @@ var FISHTANK = (function () {
             }
         } else if (swim) {
             var swimAngle = this.angle + Math.PI / 2;
-            this.verticalVelocity += Math.sin(swimAngle) * this.swimVelocity;
-            this.radialVelocity -= Math.cos(swimAngle) * this.swimVelocity / this.radialDistance;
+            this.verticalVelocity += Math.sin(swimAngle) * velocity;
+            this.radialVelocity -= Math.cos(swimAngle) * velocity / this.radialDistance;
             this.swimAnim = this.swimFlip.setupPlayback(20, false);
         }
 
@@ -68,7 +74,7 @@ var FISHTANK = (function () {
 
         var direction = Math.sign(this.radialVelocity);
         if (direction) {
-            this.radialVelocity -= direction * elapsed * this.radialVelocityDecay;
+            this.radialVelocity -= direction * elapsed * velocityDrag;
             if (Math.sign(this.radialVelocity) !== direction) {
                 this.radialVelocity = 0;
             }
@@ -81,7 +87,7 @@ var FISHTANK = (function () {
             breaks = 0.005;
 
         if (this.height > 0) {
-            this.verticalVelocity -= this.gravity * elapsed;
+            this.verticalVelocity -= gravity * elapsed;
         } else {
             this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
         }
@@ -295,6 +301,7 @@ var FISHTANK = (function () {
                 this.urchins.push(thing);
             }
         }
+        this.gameStarted = true;
     };
 
     Tank.prototype.setupRoom = function (room) {
@@ -324,9 +331,7 @@ var FISHTANK = (function () {
             }
         } else {
             if (keyboard.wasKeyPressed(IO.KEYS.Space)) {
-                if (!this.gameStarted) {
-                    this.gameStarted = true;
-                } else {
+                if (this.gameStarted) {
                     swim = true;
                 }
             }
@@ -390,6 +395,9 @@ var FISHTANK = (function () {
             console.log("All Tests Passed!");
         }
         MAIN.start(document.getElementById("canvas3D"), new Tank("safe"));
+        gravitySlider = document.getElementById("gravity");
+        velocitySlider = document.getElementById("velocity");
+        dragSlider = document.getElementById("drag");
     }
 
     return {

@@ -13,7 +13,6 @@
         <script type="text/javascript" src="blitblort/src/entropy.js"></script>
         <script type="text/javascript" src="blitblort/src/r2.js"></script>
         <script type="text/javascript" src="blitblort/src/r3.js"></script>
-        <script type="text/javascript" src="blitblort/src/webgl-debug.js"></script>
         <script type="text/javascript" src="blitblort/src/wgl.js"></script>
         <script type="text/javascript" src="blitblort/src/blob.js"></script>
         <script type="text/javascript" src="blitblort/src/improc.js"></script>
@@ -23,11 +22,34 @@
         <script type="text/javascript" src="src/fishtank.js"></script>
     </head>
     <body>
-        <canvas id="canvas3D" width="500" height="600">
+        <canvas id="canvas3D" width="800" height="600">
             Sorry, your browser doesn't support the &lt;canvas&gt; element.
         </canvas>
+        <div class="controls" id="controls">
+            <div class="menuBorder">
+                <div class="menuToggle">
+                    <a href="javascript:void(0)" id="menuButton"><div class="hamburger"></div></a>
+                </div>
+            </div>
+                <form>
+                    <div class="">
+                        <div>Gravity:</div>
+                        <input id="gravity" class="rangeSlider" type="range" min="0.01" max="200" step="0.01" value="100">
+                    </div>
+                    <div class="">
+                        <div>Velocity:</div>
+                        <input id="velocity" class="rangeSlider" type="range" min="0.01" max="200" step="0.01" value="100">
+                    </div>
+                    <div class="">
+                        <div>Drag:</div>
+                        <input id="drag" class="rangeSlider" type="range" min="0.01" max="200" step="0.01" value="100">
+                    </div>
+                </form>
+            </div>
+        </div>
         <script type="text/javascript">
             window.onload = function(e) {
+                MAIN.setupToggleControls();
                 FISHTANK.start();
             };
         </script>
