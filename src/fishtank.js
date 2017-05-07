@@ -29,6 +29,7 @@ var FISHTANK = (function () {
         this.soundIndex = 0;
 
         this.deathSound = new BLORT.Noise("sounds/Death01.wav");
+        this.pickupSound = new BLORT.Noise("sounds/Pickup01.wav");
 
         for (var step = 1; step <= 3; ++step) {
             var noise = new BLORT.Noise("sounds/Swim0" + step + ".wav");
@@ -144,7 +145,10 @@ var FISHTANK = (function () {
                     this.radialVelocity -= this.radialVelocity * breaks * elapsed;
                     this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
                 } else if (obstacle.type === "obsStar") {
-                    
+                    if (!obstacle.thing.collected) {
+                        obstacle.thing.collected = true;
+                        this.pickupSound.play();
+                    }
                 } else if (obstacle.type === "obsUrchin") {
                     this.alive = false;
                     this.deathSound.play();
@@ -169,6 +173,12 @@ var FISHTANK = (function () {
             TOP = 8.3;
         if (this.height < 0 && !this.alive) {
             this.reset();
+            for (var ob = 0; ob < obstacles.length; ++ob) {
+                var obs = obstacles[ob];
+                if (obs.thing) {
+                    obs.thing.collected = false;
+                }
+            }
         } else if (this.height < BOTTOM) {
             this.height = BOTTOM;
             this.verticalVelocity = 0;
@@ -399,6 +409,8 @@ var FISHTANK = (function () {
                 thing.scaleBy(0.1);
                 thing.setBillboardUp(new R3.V(0, 1, 0));
                 this.stars.push(thing);
+                thing.collected = false;
+                obstacle.thing = thing;
             }
         }
         this.gameStarted = true;
@@ -511,7 +523,7 @@ var FISHTANK = (function () {
             texture = null;
             for (var s = 0; s < this.stars.length; ++s) {
                 var star = this.stars[s];
-                if (Math.abs(star.position.y - eye.y) < 1) {
+                if (!star.collected && Math.abs(star.position.y - eye.y) < 1) {
                     if (texture === null) {
                         texture = room.rebindTexture(star.mesh, this.program);
                     }
