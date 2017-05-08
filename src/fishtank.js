@@ -46,7 +46,7 @@ var FISHTANK = (function () {
         this.swimAnim = null;
         this.deathAnim = null;
         this.alive = true;
-    }
+    };
 
     Jellyfish.prototype.construct = function () {
         this.textureCanvas = document.createElement('canvas');
@@ -57,8 +57,8 @@ var FISHTANK = (function () {
         this.thing.scaleBy(0.24);
 
         this.updatePosition();
-        return this.thing
-    }
+        return this.thing;
+    };
 
     Jellyfish.prototype.update = function (started, elapsed, swim, steer, obstacles) {
         var animElapsed = elapsed,
@@ -208,7 +208,7 @@ var FISHTANK = (function () {
 
     Obstacle.prototype.place = function (transform) {
         return new Obstacle(transform.transformP(this.position), this.type);
-    }
+    };
 
     function Can(resource, blumps, height) {
         this.resource = resource;
@@ -229,13 +229,13 @@ var FISHTANK = (function () {
         }
 
         var transform = R3.makeRotateY(angleOffset);
-        transform.translate(offset)
+        transform.translate(offset);
 
         for (var o = 0; o < this.obstacles.length; ++o) {
             obstacles.push(this.obstacles[o].place(transform));
         }
         return heightOffset + this.height;
-    }
+    };
 
     function Tank(viewport, editor) {
         this.clearColor = [97 / 255, 154 / 255, 130 / 255, 1];
@@ -378,7 +378,7 @@ var FISHTANK = (function () {
 
     Tank.prototype.finalize = function () {
         console.log("Load completed!");
-        var hOffset = -.5,
+        var hOffset = -0.5,
             angles = [58, 30, 270, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58];
 
         for (var c = 0; c < this.cans.length; ++c) {
@@ -391,32 +391,32 @@ var FISHTANK = (function () {
         for (var o = 0; o < this.obstacles.length; ++o) {
             var obstacle = this.obstacles[o];
             if (obstacle.type === "obsUrchin") {
-                var thing = new BLOB.Thing(WGL.makeBillboard(this.urchinCanvas, WGL.uvFill())),
-                    pos = obstacle.position.copy();
-                if (pos.y < -0.2) {
+                var urchin = new BLOB.Thing(WGL.makeBillboard(this.urchinCanvas, WGL.uvFill())),
+                    urchinLocation = obstacle.position.copy();
+                if (urchinLocation.y < -0.2) {
                     continue;
                 }
-                pos.x *= 1.2;
-                pos.z *= 1.2;
-                thing.setPosition(pos);
-                thing.scaleBy(0.15);
-                thing.setBillboardUp(new R3.V(0, 1, 0));
-                this.urchins.push(thing);
+                urchinLocation.x *= 1.2;
+                urchinLocation.z *= 1.2;
+                urchin.setPosition(urchinLocation);
+                urchin.scaleBy(0.15);
+                urchin.setBillboardUp(new R3.V(0, 1, 0));
+                this.urchins.push(urchin);
             }
             if (obstacle.type === "obsStar") {
-                var thing = new BLOB.Thing(WGL.makeBillboard(this.starCanvas, WGL.uvFill())),
-                    pos = obstacle.position.copy();
-                if (pos.y < -0.2) {
+                var star = new BLOB.Thing(WGL.makeBillboard(this.starCanvas, WGL.uvFill())),
+                    starPos = obstacle.position.copy();
+                if (starPos.y < -0.2) {
                     continue;
                 }
-                pos.x *= 1.1;
-                pos.z *= 1.1;
-                thing.setPosition(pos);
-                thing.scaleBy(0.1);
-                thing.setBillboardUp(new R3.V(0, 1, 0));
-                this.stars.push(thing);
-                thing.collected = false;
-                obstacle.thing = thing;
+                starPos.x *= 1.1;
+                starPos.z *= 1.1;
+                star.setPosition(starPos);
+                star.scaleBy(0.1);
+                star.setBillboardUp(new R3.V(0, 1, 0));
+                this.stars.push(star);
+                star.collected = false;
+                obstacle.thing = star;
             }
         }
         this.gameStarted = true;
