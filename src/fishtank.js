@@ -140,7 +140,6 @@ var FISHTANK = (function () {
                 distanceSq = R3.pointDistanceSq(this.thing.position, obstacle.position);
 
             if (distanceSq < collisionSizeSq) {
-                console.log(obstacle.type);
                 if (obstacle.type === "obsSlow") {
                     this.radialVelocity -= this.radialVelocity * breaks * elapsed;
                     this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
