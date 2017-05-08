@@ -267,13 +267,14 @@ var FISHTANK = (function () {
         this.urchinAnim = null;
         this.starAnim = null;
 
+        this.spriteSize = 256;
         this.urchinCanvas = document.createElement('canvas');
         this.urchinContext = this.urchinCanvas.getContext('2d');
-        this.urchinCanvas.width = this.urchinCanvas.height = 128;
+        this.urchinCanvas.width = this.urchinCanvas.height = this.spriteSize;
 
         this.starCanvas = document.createElement('canvas');
         this.starContext = this.starCanvas.getContext('2d');
-        this.starCanvas.width = this.starCanvas.height = 128;
+        this.starCanvas.width = this.starCanvas.height = this.spriteSize;
 
         this.gameStarted = false;
         this.music = new BLORT.Tune("sounds/MusicLoop");
@@ -456,10 +457,11 @@ var FISHTANK = (function () {
             this.urchinAnim.update(elapsed);
             this.starAnim.update(elapsed);
 
-            this.urchinContext.clearRect(0, 0, 128, 128);
-            this.urchinAnim.draw(this.urchinContext, 64, 64, BLIT.ALIGN.Center, 128, 128);
-            this.starContext.clearRect(0, 0, 128, 128);
-            this.starAnim.draw(this.starContext, 64, 64, BLIT.ALIGN.Center, 128, 128);
+            var res = this.spriteSize, halfRes = res / 2;
+            this.urchinContext.clearRect(0, 0, res, res);
+            this.urchinAnim.draw(this.urchinContext, halfRes,halfRes, BLIT.ALIGN.Center, res, res);
+            this.starContext.clearRect(0, 0, res, res);
+            this.starAnim.draw(this.starContext, halfRes, halfRes, BLIT.ALIGN.Center, res, res);
 
             if (keyboard.wasKeyPressed(IO.KEYS.Space) || keyboard.wasKeyPressed(IO.KEYS.Up)) {
                 if (this.gameStarted) {
