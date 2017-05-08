@@ -170,7 +170,7 @@ var FISHTANK = (function () {
         this.height += this.verticalVelocity * elapsed;
 
         var BOTTOM = -0.2,
-            TOP = 8.3;
+            TOP = 8;
         if (this.height < 0 && !this.alive) {
             this.reset();
             for (var ob = 0; ob < obstacles.length; ++ob) {
@@ -234,7 +234,7 @@ var FISHTANK = (function () {
         for (var o = 0; o < this.obstacles.length; ++o) {
             obstacles.push(this.obstacles[o].place(transform));
         }
-        return heightOffset + this.height;
+        return heightOffset + this.height * 0.95;
     };
 
     function Tank(viewport, editor) {
