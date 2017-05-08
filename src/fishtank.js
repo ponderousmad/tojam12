@@ -37,7 +37,7 @@ var FISHTANK = (function () {
         }
     }
 
-    Jellyfish.prototype.reset = function () {
+    Jellyfish.prototype.reset = function (obstacles) {
         this.angle = 0;
         this.height = 0;
         this.positionAngle = 0;
@@ -46,6 +46,16 @@ var FISHTANK = (function () {
         this.swimAnim = null;
         this.deathAnim = null;
         this.alive = true;
+        this.sinceDeath = 0;
+
+        if (obstacles) {
+            for (var o = 0; o < obstacles.length; ++o) {
+                var obs = obstacles[o];
+                if (obs.thing) {
+                    obs.thing.collected = false;
+                }
+            }
+        }
     };
 
     Jellyfish.prototype.construct = function () {
@@ -72,6 +82,7 @@ var FISHTANK = (function () {
         if (!this.alive) {
             swim = false;
             steer = 0;
+            this.sinceDeath += elapsed;
         }
 
         if (this.deathAnim) {
@@ -111,14 +122,22 @@ var FISHTANK = (function () {
         this.thing.mesh.updatedTexture = true;
 
         var direction = Math.sign(this.radialVelocity);
-        if (direction) {
+        if (!this.alive && !this.deathAnim) {
+            if (direction === 0) {
+                direction = -Math.sign(this.positionAngle);
+            }
+            var targetVelocity = direction * Math.max(0.2, Math.abs(this.positionAngle / Math.PI)) * 0.002,
+                smoothing = Math.min(1, this.sinceDeath / 500);
+            this.radialVelocity = this.radialVelocity * (1-smoothing) + targetVelocity * smoothing;
+
+        } else if (direction) {
             this.radialVelocity -= direction * elapsed * velocityDrag;
             if (Math.sign(this.radialVelocity) !== direction) {
                 this.radialVelocity = 0;
             }
         }
 
-        this.positionAngle += this.radialVelocity * elapsed;
+        this.positionAngle = R2.clampAngle(this.positionAngle + this.radialVelocity * elapsed);
 
         var collisionSize = 0.2,
             collisionSizeSq = collisionSize * collisionSize,
@@ -168,16 +187,10 @@ var FISHTANK = (function () {
 
         this.height += this.verticalVelocity * elapsed;
 
-        var BOTTOM = -0.2,
+        var BOTTOM = this.alive ? -0.2 : 0,
             TOP = 8;
-        if (this.height < 0 && !this.alive) {
-            this.reset();
-            for (var ob = 0; ob < obstacles.length; ++ob) {
-                var obs = obstacles[ob];
-                if (obs.thing) {
-                    obs.thing.collected = false;
-                }
-            }
+        if (this.height <= BOTTOM && !this.alive && Math.abs(this.positionAngle) < 1 * R2.DEG_TO_RAD) {
+            this.reset(obstacles);
         } else if (this.height < BOTTOM) {
             this.height = BOTTOM;
             this.verticalVelocity = 0;
