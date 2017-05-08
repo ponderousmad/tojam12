@@ -8,6 +8,7 @@
             "texture": "tunabits/tuna_col1.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
+            "xEdgeMode": 2,
             "angle": 0
         },
         {
@@ -15,6 +16,7 @@
             "texture": "tunabits/tuna_col2.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
+            "xEdgeMode": 2,
             "angle": 45,
             "POIs" : [
                 {
@@ -22,7 +24,7 @@
                     "y": 70,
                     "type": "obstacle"
                 },
-				{
+                {
                     "x": 125,
                     "y": 75,
                     "type": "obsUrchin"
@@ -34,8 +36,9 @@
             "texture": "tunabits/tuna_col3.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
+            "xEdgeMode": 2,
             "angle": 90,
-			"POIs" : [
+            "POIs" : [
                 {
                     "x": 119,
                     "y": 54,
@@ -48,20 +51,22 @@
             "texture": "tunabits/tuna_col4.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
+            "xEdgeMode": 2,
             "angle": 135,
-			"POIs" : [
-				{
+            "POIs" : [
+                {
                     "x": 125,
                     "y": 75,
                     "type": "obsStar"
-				}
-			]
+                }
+            ]
         },
         {
             "resource": "tunabits/tuna_depth1.png",
             "texture": "tunabits/tuna_col1.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
+            "xEdgeMode": 2,
             "angle": 180
         },
         {
@@ -69,6 +74,7 @@
             "texture": "tunabits/tuna_col2.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
+            "xEdgeMode": 2,
             "angle": 225,
             "POIs" : [
                 {
@@ -76,7 +82,7 @@
                     "y": 70,
                     "type": "obstacle"
                 },
-				{
+                {
                     "x": 125,
                     "y": 74,
                     "type": "obsUrchin"
@@ -88,8 +94,9 @@
             "texture": "tunabits/tuna_col3.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
+            "xEdgeMode": 2,
             "angle": 270,
-			"POIs" : [
+            "POIs" : [
                 {
                     "x": 119,
                     "y": 54,
@@ -102,14 +109,15 @@
             "texture": "tunabits/tuna_col4.jpg",
             "geometry": "cylinder",
             "cylinderAngle": 45,
+            "xEdgeMode": 2,
             "angle": 315,
-			"POIs" : [
-				{
+            "POIs" : [
+                {
                     "x": 125,
                     "y": 75,
                     "type": "obsStar"
-				}
-			]
+                }
+            ]
         }
     ]
 }
