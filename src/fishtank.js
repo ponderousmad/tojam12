@@ -393,7 +393,7 @@ var FISHTANK = (function () {
             if (obstacle.type === "obsUrchin") {
                 var thing = new BLOB.Thing(WGL.makeBillboard(this.urchinCanvas, WGL.uvFill())),
                     pos = obstacle.position.copy();
-                if (pos.y < 0) {
+                if (pos.y < -0.2) {
                     continue;
                 }
                 pos.x *= 1.2;
@@ -406,7 +406,7 @@ var FISHTANK = (function () {
             if (obstacle.type === "obsStar") {
                 var thing = new BLOB.Thing(WGL.makeBillboard(this.starCanvas, WGL.uvFill())),
                     pos = obstacle.position.copy();
-                if (pos.y < 0) {
+                if (pos.y < -0.2) {
                     continue;
                 }
                 pos.x *= 1.1;
@@ -462,7 +462,7 @@ var FISHTANK = (function () {
             this.starContext.clearRect(0, 0, 128, 128);
             this.starAnim.draw(this.starContext, 64, 64, BLIT.ALIGN.Center, 128, 128);
 
-            if (keyboard.wasKeyPressed(IO.KEYS.Space)) {
+            if (keyboard.wasKeyPressed(IO.KEYS.Space) || keyboard.wasKeyPressed(IO.KEYS.Up)) {
                 if (this.gameStarted) {
                     swim = true;
                 }
