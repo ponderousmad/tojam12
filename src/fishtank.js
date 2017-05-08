@@ -122,15 +122,7 @@ var FISHTANK = (function () {
         this.thing.mesh.updatedTexture = true;
 
         var direction = Math.sign(this.radialVelocity);
-        if (!this.alive && !this.deathAnim) {
-            if (direction === 0) {
-                direction = -Math.sign(this.positionAngle);
-            }
-            var targetVelocity = direction * Math.max(0.2, Math.abs(this.positionAngle / Math.PI)) * 0.002,
-                smoothing = Math.min(1, this.sinceDeath / 500);
-            this.radialVelocity = this.radialVelocity * (1-smoothing) + targetVelocity * smoothing;
-
-        } else if (direction) {
+        if (direction) {
             this.radialVelocity -= direction * elapsed * velocityDrag;
             if (Math.sign(this.radialVelocity) !== direction) {
                 this.radialVelocity = 0;
@@ -140,6 +132,7 @@ var FISHTANK = (function () {
         this.positionAngle = R2.clampAngle(this.positionAngle + this.radialVelocity * elapsed);
 
         var collisionSize = 0.2,
+            starSizeSq = 0.15 * 0.15,
             collisionSizeSq = collisionSize * collisionSize,
             breaks = 0.005;
 
@@ -163,7 +156,7 @@ var FISHTANK = (function () {
                     this.radialVelocity -= this.radialVelocity * breaks * elapsed;
                     this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
                 } else if (obstacle.type === "obsStar") {
-                    if (obstacle.thing && !obstacle.thing.collected) {
+                    if (distanceSq < starSizeSq && obstacle.thing && !obstacle.thing.collected) {
                         obstacle.thing.collected = true;
                         this.pickupSound.play();
                     }
@@ -189,7 +182,7 @@ var FISHTANK = (function () {
 
         var BOTTOM = this.alive ? -0.2 : 0,
             TOP = 8;
-        if (this.height <= BOTTOM && !this.alive && Math.abs(this.positionAngle) < 1 * R2.DEG_TO_RAD) {
+        if (this.height <= BOTTOM && !this.alive) {
             this.reset(obstacles);
         } else if (this.height < BOTTOM) {
             this.height = BOTTOM;
