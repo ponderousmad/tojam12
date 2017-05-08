@@ -438,7 +438,7 @@ var FISHTANK = (function () {
         room.gl.enable(room.gl.BLEND);
     };
 
-    Tank.prototype.update = function (now, elapsed, keyboard, pointer) {
+    Tank.prototype.update = function (now, elapsed, keyboard, pointer, width, height) {
         if (elapsed > 100) {
             elapsed = 100;
         }
@@ -463,21 +463,33 @@ var FISHTANK = (function () {
             this.urchinAnim.update(elapsed);
             this.starAnim.update(elapsed);
 
-            var res = this.spriteSize, halfRes = res / 2;
+            var res = this.spriteSize, halfRes = res / 2,
+                halfHeight = height / 2,
+                halfWidth = width / 2;
             this.urchinContext.clearRect(0, 0, res, res);
             this.urchinAnim.draw(this.urchinContext, halfRes,halfRes, BLIT.ALIGN.Center, res, res);
             this.starContext.clearRect(0, 0, res, res);
             this.starAnim.draw(this.starContext, halfRes, halfRes, BLIT.ALIGN.Center, res, res);
 
-            if (keyboard.wasKeyPressed(IO.KEYS.Space) || keyboard.wasKeyPressed(IO.KEYS.Up)) {
+            if (keyboard.wasKeyPressed(IO.KEYS.Space) ||
+                keyboard.wasKeyPressed(IO.KEYS.Up) ||
+                keyboard.wasAsciiPressed("W") ||
+                (pointer.activated() && pointer.primary.y < halfHeight)
+            ) {
                 if (this.gameStarted) {
                     swim = true;
                 }
             }
-            if (keyboard.isKeyDown(IO.KEYS.Left) || keyboard.isAsciiDown("A")) {
+            if (keyboard.isKeyDown(IO.KEYS.Left) ||
+                keyboard.isAsciiDown("A") ||
+                (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x < halfWidth)
+            ) {
                 steer = 1;
             }
-            if (keyboard.isKeyDown(IO.KEYS.Right) || keyboard.isAsciiDown("D")) {
+            if (keyboard.isKeyDown(IO.KEYS.Right) ||
+                keyboard.isAsciiDown("D") ||
+                (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x > halfWidth)
+            ) {
                 steer = -1;
             }
 
