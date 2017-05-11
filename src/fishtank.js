@@ -458,7 +458,24 @@ var FISHTANK = (function () {
         var swim = false,
             steer = 0,
             halfHeight = height / 2,
-            halfWidth = width / 2;
+            halfWidth = width / 2,
+            isSwimTouch = false,
+            isLeftTouch = false,
+            isRightTouch = false;
+
+        pointer.touch.filterTouches(function (id, x, y, isStart) {
+            if (y < halfHeight) {
+                if (isStart) {
+                    isSwimTouch = true;
+                }
+            } else {
+                if (x < halfWidth) {
+                    isLeftTouch = true;
+                } else {
+                    isRightTouch = true;
+                }
+            }
+        });
 
         this.urchinAnim.update(elapsed);
         this.starAnim.update(elapsed);
@@ -466,7 +483,8 @@ var FISHTANK = (function () {
         if (keyboard.wasKeyPressed(IO.KEYS.Space) ||
             keyboard.wasKeyPressed(IO.KEYS.Up) ||
             keyboard.wasAsciiPressed("W") ||
-            (pointer.activated() && pointer.primary.y < halfHeight)
+            (pointer.activated() && pointer.primary.y < halfHeight) ||
+            isSwimTouch
         ) {
             if (this.gameStarted) {
                 swim = true;
@@ -474,13 +492,15 @@ var FISHTANK = (function () {
         }
         if (keyboard.isKeyDown(IO.KEYS.Left) ||
             keyboard.isAsciiDown("A") ||
-            (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x < halfWidth)
+            (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x < halfWidth) ||
+            isLeftTouch
         ) {
             steer = 1;
         }
         if (keyboard.isKeyDown(IO.KEYS.Right) ||
             keyboard.isAsciiDown("D") ||
-            (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x > halfWidth)
+            (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x > halfWidth) ||
+            isRightTouch
         ) {
             steer = -1;
         }
