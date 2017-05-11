@@ -340,10 +340,24 @@ var FISHTANK = (function () {
 
     Tank.prototype.constructBlumps = function (resource, blumps) {
         this.loadState = "constructing";
-        var image = blumps[0].image,
-            atlas = blumps[0].constructAtlas(blumps.length);
-
+        var textures = [];
         for (var b = 0; b < blumps.length; ++b) {
+            var found = false,
+                blump = blumps[b];
+            for (var t = 0; t < textures.length; ++t) {
+                if (textures[t] === blump.texture) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                textures.push(blump.texture);
+            }
+        }
+        var image = blumps[0].image,
+            atlas = blumps[0].constructAtlas(textures.length);
+
+        for (b = 0; b < blumps.length; ++b) {
             blumps[b].construct(atlas, false, false);
         }
         this.setupCan(resource, blumps);
