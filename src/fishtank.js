@@ -228,16 +228,21 @@ var FISHTANK = (function () {
             var blump = this.blumps[b],
                 thing = new BLOB.Thing();
             thing.mesh = blump.mesh;
+            blump.transformThing(thing);
             thing.move(offset);
             thing.rotate(angleOffset, new R3.V(0, 1, 0));
+            blump.placePOIs(thing);
+
+            var transform = thing.getToWorld();
+
+            for (var p = 0; p < blump.pointsOfInterest.length; ++p) {
+                var poi = blump.pointsOfInterest[p];
+                if (poi.type.slice(0,3) === "obs") {
+                    obstacles.push(new Obstacle(transform.transformP(poi.localPoint), poi.type));
+                }
+            }
+
             things.push(thing);
-        }
-
-        var transform = R3.makeRotateY(angleOffset);
-        transform.translate(offset);
-
-        for (var o = 0; o < this.obstacles.length; ++o) {
-            obstacles.push(this.obstacles[o].place(transform));
         }
         return heightOffset + this.height * 0.95;
     };
@@ -354,15 +359,7 @@ var FISHTANK = (function () {
     Tank.prototype.setupCan = function (resource, blumps) {
         var can = new Can(resource, blumps, blumps[0].height() * blumps[0].pixelSize);
         for (var b = 0; b < blumps.length; ++b) {
-            var blump = blumps[b];
-            for (var p = 0; p < blump.pointsOfInterest.length; ++p) {
-                var poi = blump.pointsOfInterest[p];
-                if (poi.type.slice(0,3) === "obs") {
-                    var position = poi.localPoint.copy();
-                    can.obstacles.push(new Obstacle(position, poi.type));
-                }
-            }
-            blump.simplify();
+            blumps[b].simplify();
         }
         this.cans.push(can);
     };
