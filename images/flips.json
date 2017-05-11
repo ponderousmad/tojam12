@@ -416,7 +416,7 @@
             ]
         },
         {
-            "image": "SpriteAtlas1.png",
+            "image": "spriteAtlas1.png",
             "frames": [
                 {
                     "uMin": 0,
