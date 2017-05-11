@@ -1,0 +1,508 @@
+{
+    "idleFlip": [
+        {
+            "image": "jelly/idleAtlas0.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        },
+        {
+            "image": "jelly/idleAtlas1.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        },
+        {
+            "image": "jelly/idleAtlas2.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        },
+        {
+            "image": "jelly/idleAtlas3.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        }
+    ],
+    "swimFlip": [
+        {
+            "image": "jelly/swimAtlas0.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        },
+        {
+            "image": "jelly/swimAtlas1.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        },
+        {
+            "image": "jelly/swimAtlas2.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        },
+        {
+            "image": "jelly/swimAtlas3.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        }
+    ],
+    "dieFlip": [
+        {
+            "image": "jelly/dieAtlas0.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        },
+        {
+            "image": "jelly/dieAtlas1.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        },
+        {
+            "image": "jelly/dieAtlas2.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.5,
+                    "vSize": 0.5
+                }
+            ]
+        }
+    ],
+    "urchyFlip": [
+        {
+            "image": "spriteAtlas0.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.75,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.75,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0.5,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.5,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.75,
+                    "vMin": 0.5,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                }
+            ]
+        }
+    ],
+    "starFlip": [
+        {
+            "image": "spriteAtlas0.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0.75,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0.75,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.75,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.75,
+                    "vMin": 0.75,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                }
+            ]
+        },
+        {
+            "image": "SpriteAtlas1.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.75,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.75,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0.5,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.5,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.75,
+                    "vMin": 0.5,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.75,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0.75,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                }
+            ]
+        }
+    ]
+}
