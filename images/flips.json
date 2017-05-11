@@ -1,5 +1,5 @@
 {
-    "idleFlip": [
+    "idle": [
         {
             "image": "jelly/idleAtlas0.png",
             "frames": [
@@ -111,7 +111,7 @@
             ]
         }
     ],
-    "swimFlip": [
+    "swim": [
         {
             "image": "jelly/swimAtlas0.png",
             "frames": [
@@ -223,7 +223,7 @@
             ]
         }
     ],
-    "dieFlip": [
+    "die": [
         {
             "image": "jelly/dieAtlas0.png",
             "frames": [
@@ -306,7 +306,7 @@
             ]
         }
     ],
-    "urchyFlip": [
+    "urchy": [
         {
             "image": "spriteAtlas0.png",
             "frames": [
@@ -385,7 +385,7 @@
             ]
         }
     ],
-    "starFlip": [
+    "star": [
         {
             "image": "spriteAtlas0.png",
             "frames": [

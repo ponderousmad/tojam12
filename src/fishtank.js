@@ -1,12 +1,13 @@
 var FISHTANK = (function () {
     "use strict";
 
-    var urchinImage = null,
-        gravitySlider = null,
+    var gravitySlider = null,
         velocitySlider = null,
-        dragSlider = null;
+        dragSlider = null,
+        BATCH_CAN = 1,
+        BATCH_FLIPS = 2;
 
-    function Jellyfish(batch) {
+    function Jellyfish(idleFlip, swimFlip, deathFlip) {
         this.thing = null;
 
         this.reset();
@@ -18,18 +19,19 @@ var FISHTANK = (function () {
         this.gravity = 0.000001;
         this.swimVelocity = 0.001;
 
-        this.idleAnim = new BLIT.Flip(batch, "jelly/idle_", 15, 5).setupPlayback(50, true);
-        this.swimFlip = new BLIT.Flip(batch, "jelly/swim_", 15, 5);
-        this.deathFlip = new BLIT.Flip(batch, "jelly/die_", 11, 2);
-
-        this.textureCanvas = null;
-        this.textureContext = null;
+        this.idleAnim = idleFlip.setupPlayback(50, true);
+        this.swimFlip = swimFlip;
+        this.deathFlip = deathFlip;
 
         this.swimSounds = [];
         this.soundIndex = 0;
 
         this.deathSound = new BLORT.Noise("sounds/Death01.wav");
         this.pickupSound = new BLORT.Noise("sounds/Pickup01.wav");
+
+        this.thing = new BLOB.Thing();
+        this.thing.scaleBy(0.15);
+        this.updatePosition();
 
         for (var step = 1; step <= 3; ++step) {
             var noise = new BLORT.Noise("sounds/Swim0" + step + ".wav");
@@ -56,18 +58,6 @@ var FISHTANK = (function () {
                 }
             }
         }
-    };
-
-    Jellyfish.prototype.construct = function () {
-        this.textureCanvas = document.createElement('canvas');
-        this.textureContext = this.textureCanvas.getContext('2d');
-        this.textureCanvas.width = this.textureCanvas.height = 512;
-
-        this.thing = new BLOB.Thing(WGL.makeBillboard(this.textureCanvas, WGL.uvFill()));
-        this.thing.scaleBy(0.24);
-
-        this.updatePosition();
-        return this.thing;
     };
 
     Jellyfish.prototype.update = function (started, elapsed, swim, steer, obstacles) {
@@ -110,16 +100,16 @@ var FISHTANK = (function () {
             this.swimAnim = this.swimFlip.setupPlayback(20, false);
         }
 
-        this.textureContext.clearRect(0, 0, this.textureCanvas.width, this.textureCanvas.height);
+        var mesh = null;
         if (this.deathAnim) {
-            this.deathAnim.draw(this.textureContext, 256, 256, BLIT.ALIGN.Center, 400, 400);
+            mesh = this.deathAnim.mesh();
         } else if (this.swimAnim) {
-            this.swimAnim.draw(this.textureContext, 256, 256, BLIT.ALIGN.Center, 240, 420);
+            mesh = this.swimAnim.mesh();
         } else if (this.alive) {
             this.idleAnim.update(animElapsed);
-            this.idleAnim.draw(this.textureContext, 256, 256, BLIT.ALIGN.Center, 256, 256);
+            mesh = this.idleAnim.mesh();
         }
-        this.thing.mesh.updatedTexture = true;
+        this.thing.mesh = mesh;
 
         var direction = Math.sign(this.radialVelocity);
         if (direction) {
@@ -215,8 +205,7 @@ var FISHTANK = (function () {
         return new Obstacle(transform.transformP(this.position), this.type);
     };
 
-    function Can(resource, blumps, height) {
-        this.resource = resource;
+    function Can(blumps, height) {
         this.blumps = blumps;
         this.obstacles = [];
         this.height = height;
@@ -261,11 +250,10 @@ var FISHTANK = (function () {
         this.TILT_MAX = Math.PI * 0.49;
         this.eyeHeight = 0;
 
-        this.loadingFile = 0;
-        this.loadState = null;
+        this.loadState = 0;
 
-        this.files = ["images/tunabits/can.json"];
         this.jellyfish = null;
+        this.blumps = [];
         this.cans = [];
         this.things = [];
         this.obstacles = [];
@@ -278,44 +266,24 @@ var FISHTANK = (function () {
         this.urchinAnim = null;
         this.starAnim = null;
 
-        this.spriteSize = 256;
-        this.urchinCanvas = document.createElement('canvas');
-        this.urchinContext = this.urchinCanvas.getContext('2d');
-        this.urchinCanvas.width = this.urchinCanvas.height = this.spriteSize;
-
-        this.starCanvas = document.createElement('canvas');
-        this.starContext = this.starCanvas.getContext('2d');
-        this.starCanvas.width = this.starCanvas.height = this.spriteSize;
-
         this.gameStarted = false;
         this.music = new BLORT.Tune("sounds/MusicLoop");
-
-        this.batchAnimations();
     }
 
-    Tank.prototype.batchAnimations = function () {
-        var self = this,
-            jellyfish = null,
-            batch = new BLIT.Batch("images/", function() {
-                jellyfish.construct();
-                self.jellyfish = jellyfish;
-                self.setupBackgrounds();
-            });
-        urchinImage = batch.load("urchin.png");
-        this.backgroundImages.push(batch.load("bg.jpg"));
-        this.backgroundImages.push(batch.load("bg_layer1.png"));
-        this.backgroundImages.push(batch.load("bg_layer2.png"));
-        jellyfish = new Jellyfish(batch);
+    Tank.prototype.batchAnimations = function (data) {
+        this.jellyfish = new Jellyfish(
+            new BLOB.Flip(data.idle, this.textureCache),
+            new BLOB.Flip(data.swim, this.textureCache),
+            new BLOB.Flip(data.die, this.textureCache)
+        );
 
-        this.urchinAnim = new BLIT.Flip(batch, "urchy_", 12, 2).setupPlayback(50, true);
-        this.starAnim = new BLIT.Flip(batch, "star_", 18, 2).setupPlayback(50, true);
-        batch.commit();
+        this.urchinAnim = new BLOB.Flip(data.urchy, this.textureCache).setupPlayback(50, true);
+        this.starAnim = new BLOB.Flip(data.star, this.textureCache).setupPlayback(50, true);
+        this.loadState |= BATCH_FLIPS;
+        this.updateBatch();
     };
 
-    Tank.prototype.batchCan = function (resource, blumpData) {
-        this.loadState = "batching";
-
-        var blumps = [];
+    Tank.prototype.batchCan = function (blumpData) {
         for (var d = 0; d < blumpData.blumps.length; ++d) {
             var blump = new BLUMP.Blump(
                 blumpData.blumps[d],
@@ -324,23 +292,26 @@ var FISHTANK = (function () {
                 blumpData.depthOffset || 0.1,
                 BLIT.ALIGN.Bottom
             );
-            blumps.push(blump);
+            this.blumps.push(blump);
         }
 
-        var self = this,
-            batch = new BLIT.Batch("images/", function() {
-                self.constructBlumps(resource, blumps);
-            });
-
-        for (var b = 0; b < blumps.length; ++b) {
-            blumps[b].batch(batch);
+        for (var b = 0; b < this.blumps.length; ++b) {
+            this.blumps[b].batch(this.batch);
         }
-        batch.commit();
+
+        this.loadState |= BATCH_CAN;
+        this.updateBatch();
     };
 
-    Tank.prototype.constructBlumps = function (resource, blumps) {
-        this.loadState = "constructing";
-        var textures = [];
+    Tank.prototype.updateBatch = function () {
+        if (this.loadState === (BATCH_CAN | BATCH_FLIPS)) {
+            this.batch.commit();
+        }
+    };
+
+    Tank.prototype.constructBlumps = function () {
+        var textures = [],
+            blumps = this.blumps;
         for (var b = 0; b < blumps.length; ++b) {
             var found = false,
                 blump = blumps[b];
@@ -360,18 +331,12 @@ var FISHTANK = (function () {
         for (b = 0; b < blumps.length; ++b) {
             blumps[b].construct(atlas, false, false);
         }
-        this.setupCan(resource, blumps);
-
-        this.loadState = null;
-        this.loadingFile += 1;
-
-        if (this.loadingFile === this.files.length) {
-            this.finalize();
-        }
+        this.setupCan(blumps);
+        this.finalize();
     };
 
-    Tank.prototype.setupCan = function (resource, blumps) {
-        var can = new Can(resource, blumps, blumps[0].height() * blumps[0].pixelSize);
+    Tank.prototype.setupCan = function (blumps) {
+        var can = new Can(blumps, blumps[0].height() * blumps[0].pixelSize);
         for (var b = 0; b < blumps.length; ++b) {
             blumps[b].simplify();
         }
@@ -401,14 +366,20 @@ var FISHTANK = (function () {
         for (var c = 0; c < this.cans.length; ++c) {
             for (var a = 0; a < angles.length; ++a) {
                 var angle = angles[a] * R2.DEG_TO_RAD;
-                hOffset = this.cans[c].place(hOffset, angle, this.things, this.obstacles);
+               hOffset = this.cans[c].place(hOffset, angle, this.things, this.obstacles);
             }
         }
+
+        this.urchinAnim.setup();
+        this.starAnim.setup();
+        this.jellyfish.idleAnim.setup();
+        this.jellyfish.swimFlip.constructMeshes();
+        this.jellyfish.deathFlip.constructMeshes();
 
         for (var o = 0; o < this.obstacles.length; ++o) {
             var obstacle = this.obstacles[o];
             if (obstacle.type === "obsUrchin") {
-                var urchin = new BLOB.Thing(WGL.makeBillboard(this.urchinCanvas, WGL.uvFill())),
+                var urchin = new BLOB.Thing(),
                     urchinLocation = obstacle.position.copy();
                 if (urchinLocation.y < -0.2) {
                     continue;
@@ -421,7 +392,7 @@ var FISHTANK = (function () {
                 this.urchins.push(urchin);
             }
             if (obstacle.type === "obsStar") {
-                var star = new BLOB.Thing(WGL.makeBillboard(this.starCanvas, WGL.uvFill())),
+                var star = new BLOB.Thing(),
                     starPos = obstacle.position.copy();
                 if (starPos.y < -0.2) {
                     continue;
@@ -447,9 +418,34 @@ var FISHTANK = (function () {
         room.gl.enable(room.gl.CULL_FACE);
         room.gl.blendFunc(room.gl.SRC_ALPHA, room.gl.ONE_MINUS_SRC_ALPHA);
         room.gl.enable(room.gl.BLEND);
+
+        var self = this;
+        this.batch = new BLIT.Batch("images/", function() {
+            self.constructBlumps();
+            self.setupBackgrounds();
+            self.loadState = null;
+        });
+
+        this.backgroundImages.push(this.batch.load("bg.jpg"));
+        this.backgroundImages.push(this.batch.load("bg_layer1.png"));
+        this.backgroundImages.push(this.batch.load("bg_layer2.png"));
+
+        this.textureCache = room.textureCache(this.batch);
+
+        IO.downloadJSON("images/tunabits/can.json", function (data) {
+            self.batchCan(data);
+        });
+
+        IO.downloadJSON("images/flips.json", function (data) {
+            self.batchAnimations(data);
+        });
     };
 
     Tank.prototype.update = function (now, elapsed, keyboard, pointer, width, height) {
+        if (this.loadState !== null) {
+            return;
+        }
+
         if (elapsed > 100) {
             elapsed = 100;
         }
@@ -460,61 +456,43 @@ var FISHTANK = (function () {
         }
 
         var swim = false,
-            steer = 0;
-        if (this.loadingFile < this.files.length) {
-            if (this.loadState === null) {
-                this.loadState = "setup";
-                var self = this,
-                    resource = this.files[this.loadingFile];
-                IO.downloadJSON(resource, function (data) {
-                    self.batchCan(resource, data);
-                });
-            }
-        } else {
-            this.urchinAnim.update(elapsed);
-            this.starAnim.update(elapsed);
+            steer = 0,
+            halfHeight = height / 2,
+            halfWidth = width / 2;
 
-            var res = this.spriteSize, halfRes = res / 2,
-                halfHeight = height / 2,
-                halfWidth = width / 2;
-            this.urchinContext.clearRect(0, 0, res, res);
-            this.urchinAnim.draw(this.urchinContext, halfRes,halfRes, BLIT.ALIGN.Center, res, res);
-            this.starContext.clearRect(0, 0, res, res);
-            this.starAnim.draw(this.starContext, halfRes, halfRes, BLIT.ALIGN.Center, res, res);
+        this.urchinAnim.update(elapsed);
+        this.starAnim.update(elapsed);
 
-            if (keyboard.wasKeyPressed(IO.KEYS.Space) ||
-                keyboard.wasKeyPressed(IO.KEYS.Up) ||
-                keyboard.wasAsciiPressed("W") ||
-                (pointer.activated() && pointer.primary.y < halfHeight)
-            ) {
-                if (this.gameStarted) {
-                    swim = true;
-                }
-            }
-            if (keyboard.isKeyDown(IO.KEYS.Left) ||
-                keyboard.isAsciiDown("A") ||
-                (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x < halfWidth)
-            ) {
-                steer = 1;
-            }
-            if (keyboard.isKeyDown(IO.KEYS.Right) ||
-                keyboard.isAsciiDown("D") ||
-                (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x > halfWidth)
-            ) {
-                steer = -1;
-            }
-
-            for (var t = 0; t < this.things.length; ++t) {
-                var thing = this.things[t];
-                thing.update(elapsed);
+        if (keyboard.wasKeyPressed(IO.KEYS.Space) ||
+            keyboard.wasKeyPressed(IO.KEYS.Up) ||
+            keyboard.wasAsciiPressed("W") ||
+            (pointer.activated() && pointer.primary.y < halfHeight)
+        ) {
+            if (this.gameStarted) {
+                swim = true;
             }
         }
-
-        if (this.jellyfish) {
-            this.jellyfish.update(this.gameStarted, elapsed, swim, steer, this.obstacles);
-            this.towerRotation = this.jellyfish.positionAngle;
-            this.eyeHeight = this.jellyfish.height;
+        if (keyboard.isKeyDown(IO.KEYS.Left) ||
+            keyboard.isAsciiDown("A") ||
+            (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x < halfWidth)
+        ) {
+            steer = 1;
         }
+        if (keyboard.isKeyDown(IO.KEYS.Right) ||
+            keyboard.isAsciiDown("D") ||
+            (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x > halfWidth)
+        ) {
+            steer = -1;
+        }
+
+        for (var t = 0; t < this.things.length; ++t) {
+            var thing = this.things[t];
+            thing.update(elapsed);
+        }
+
+        this.jellyfish.update(this.gameStarted, elapsed, swim, steer, this.obstacles);
+        this.towerRotation = this.jellyfish.positionAngle;
+        this.eyeHeight = this.jellyfish.height;
     };
 
     Tank.prototype.eyePosition = function () {
@@ -529,6 +507,9 @@ var FISHTANK = (function () {
 
     Tank.prototype.render = function (room, width, height) {
         room.clear(this.clearColor);
+        if (this.loadState !== null) {
+            return;
+        }
         if (room.viewer.showOnPrimary()) {
             var eye = this.eyePosition();
             room.viewer.positionView(eye, new R3.V(0, this.eyeHeight, 0), new R3.V(0, 1, 0));
@@ -545,32 +526,25 @@ var FISHTANK = (function () {
             }
 
             room.gl.depthMask(false);
-            var texture = null;
+            var urchinMesh = this.urchinAnim.mesh();
+            room.bindMeshGeometry(urchinMesh, this.program);
+            room.bindMeshTexture(urchinMesh, this.program);
             for (var u = 0; u < this.urchins.length; ++u) {
-                var urchin = this.urchins[u];
-                if (Math.abs(urchin.position.y - eye.y) < 1) {
-                    if (texture === null) {
-                        texture = room.rebindTexture(urchin.mesh, this.program);
-                    }
-                    urchin.render(room, this.program, eye, texture);
-                }
+                room.drawMeshElements(urchinMesh, this.program, this.urchins[u].renderTransform(eye));
             }
 
-            texture = null;
+            var starMesh = this.starAnim.mesh();
+            room.bindMeshGeometry(starMesh, this.program);
+            room.bindMeshTexture(starMesh, this.program);
             for (var s = 0; s < this.stars.length; ++s) {
                 var star = this.stars[s];
                 if (!star.collected && Math.abs(star.position.y - eye.y) < 1) {
-                    if (texture === null) {
-                        texture = room.rebindTexture(star.mesh, this.program);
-                    }
-                    star.render(room, this.program, eye, texture);
+                    room.drawMeshElements(starMesh, this.program, star.renderTransform(eye));
                 }
             }
 
             // Need to draw billboards last for alpha blending to work.
-            if (this.jellyfish) {
-                this.jellyfish.thing.render(room, this.program, eye);
-            }
+            this.jellyfish.thing.render(room, this.program, eye);
         }
     };
 
