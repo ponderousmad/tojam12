@@ -413,8 +413,8 @@ var FISHTANK = (function () {
                 if (urchinLocation.y < -0.2) {
                     continue;
                 }
-                urchinLocation.x *= 1.2;
-                urchinLocation.z *= 1.2;
+                urchinLocation.x *= 1.3;
+                urchinLocation.z *= 1.3;
                 urchin.setPosition(urchinLocation);
                 urchin.scaleBy(0.15);
                 urchin.setBillboardUp(new R3.V(0, 1, 0));
@@ -426,8 +426,8 @@ var FISHTANK = (function () {
                 if (starPos.y < -0.2) {
                     continue;
                 }
-                starPos.x *= 1.1;
-                starPos.z *= 1.1;
+                starPos.x *= 1.2;
+                starPos.z *= 1.2;
                 star.setPosition(starPos);
                 star.scaleBy(0.1);
                 star.setBillboardUp(new R3.V(0, 1, 0));
