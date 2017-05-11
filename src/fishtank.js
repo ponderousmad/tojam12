@@ -449,7 +449,7 @@ var FISHTANK = (function () {
         if (elapsed > 100) {
             elapsed = 100;
         }
-        if (!this.music.playing) {
+        if (this.gameStarted && !this.music.playing) {
             if (this.music.isLoaded()) {
                 this.music.play();
             }
