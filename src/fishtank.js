@@ -511,13 +511,14 @@ var FISHTANK = (function () {
             return;
         }
         if (room.viewer.showOnPrimary()) {
-            var eye = this.eyePosition();
+            var eye = this.eyePosition(),
+                drawHeight = 3;
             room.viewer.positionView(eye, new R3.V(0, this.eyeHeight, 0), new R3.V(0, 1, 0));
             room.setupView(this.program, this.viewport);
             room.gl.depthMask(true);
             for (var t = 0; t < this.things.length; ++t) {
                 var thing = this.things[t];
-                if (Math.abs(thing.position.y - eye.y) < 1) {
+                if (Math.abs(thing.position.y - eye.y) < drawHeight) {
                     thing.render(room, this.program, eye);
                 }
             }
@@ -530,7 +531,10 @@ var FISHTANK = (function () {
             room.bindMeshGeometry(urchinMesh, this.program);
             room.bindMeshTexture(urchinMesh, this.program);
             for (var u = 0; u < this.urchins.length; ++u) {
-                room.drawMeshElements(urchinMesh, this.program, this.urchins[u].renderTransform(eye));
+                var urchin = this.urchins[u];
+                if (Math.abs(urchin.position.y - eye.y) < drawHeight) {
+                    room.drawMeshElements(urchinMesh, this.program, urchin.renderTransform(eye));
+                }
             }
 
             var starMesh = this.starAnim.mesh();
@@ -538,7 +542,7 @@ var FISHTANK = (function () {
             room.bindMeshTexture(starMesh, this.program);
             for (var s = 0; s < this.stars.length; ++s) {
                 var star = this.stars[s];
-                if (!star.collected && Math.abs(star.position.y - eye.y) < 1) {
+                if (!star.collected && Math.abs(star.position.y - eye.y) < drawHeight) {
                     room.drawMeshElements(starMesh, this.program, star.renderTransform(eye));
                 }
             }
