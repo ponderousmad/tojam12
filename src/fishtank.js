@@ -173,9 +173,9 @@ var FISHTANK = (function () {
 
         this.height += this.verticalVelocity * elapsed;
 
-        var BOTTOM = this.alive ? -0.2 : 0,
-            TOP = 7.8;
-        if (this.height <= BOTTOM && !this.alive) {
+        var BOTTOM = -0.2,
+            TOP = 7.9;
+        if (this.height <= 0 && !this.alive && !this.deathAnim) {
             this.reset(obstacles);
         } else if (this.height < BOTTOM) {
             this.height = BOTTOM;
@@ -263,7 +263,7 @@ var FISHTANK = (function () {
         this.urchins = [];
         this.stars = [];
         this.sandBlump = null;
-        this.waterBlump = null;
+        this.waterTexture = null;
 
         this.backgroundImages = [];
         this.backgrounds = [];
@@ -315,16 +315,7 @@ var FISHTANK = (function () {
         });
         this.sandBlump.batch(this.batch);
 
-        this.waterBlump = new BLUMP.Blump({
-            resource: "ripple.png",
-            texture: "water.jpg",
-            pixelSize: 0.05,
-            depthRange: 0.05,
-            xEdgeMode: 0,
-            yEdgeMode: 0,
-            angle: 0,
-        });
-        this.waterBlump.batch(this.batch);
+        this.waterTexture = this.textureCache.cache("water.jpg");
 
         this.loadState |= BATCH_CAN;
         this.updateBatch();
@@ -361,9 +352,6 @@ var FISHTANK = (function () {
         atlas = this.sandBlump.constructAtlas(1);
         this.sandBlump.construct(atlas, false, false);
 
-        atlas = this.waterBlump.constructAtlas(1);
-        this.waterBlump.construct(atlas, false, false);
-
         this.setupCan(blumps);
         this.finalize();
     };
@@ -396,13 +384,15 @@ var FISHTANK = (function () {
         var hOffset = 0,
             angles = [30, 270, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58],
             sandThing = new BLOB.Thing(this.sandBlump.mesh),
-            waterThing = new BLOB.Thing(this.waterBlump.mesh);
+            waterThing = new BLOB.Thing(WGL.makeBillboard(WGL.uvFill()));
         this.things.push(sandThing);
         sandThing.rotate(-Math.PI / 2, new R3.V(1, 0, 0));
         sandThing.move(new R3.V(0, -0.45, 0));
         this.things.push(waterThing);
-        waterThing.rotate(Math.PI / 2, new R3.V(1, 0, 0));
+        waterThing.mesh.texture = this.waterTexture.texture;
+        waterThing.rotate(-Math.PI / 2, new R3.V(1, 0, 0));
         waterThing.move(new R3.V(0, 8, 0));
+        waterThing.scaleBy(7);
 
         for (var c = 0; c < this.cans.length; ++c) {
             for (var a = 0; a < angles.length; ++a) {
