@@ -119,8 +119,6 @@ var FISHTANK = (function () {
             }
         }
 
-        this.positionAngle = R2.clampAngle(this.positionAngle + this.radialVelocity * elapsed);
-
         var collisionSize = 0.2,
             urchinSizeSq = 0.16 * 0.16,
             starSizeSq = 0.13 * 0.13,
@@ -159,19 +157,17 @@ var FISHTANK = (function () {
                     }
                 } else  {
                     var verticalOffset = this.height - obstacle.position.y,
-                        obstacleAngle = Math.atan2(obstacle.z, obstacle.x),
+                        obstacleAngle = Math.atan2(obstacle.position.z, obstacle.position.x),
                         angleOffset = R2.clampAngle(obstacleAngle - this.positionAngle);
                     if (Math.sign(verticalOffset) != Math.sign(this.verticalVelocity)) {
                         this.verticalVelocity = 0;
                     }
-                    if (Math.sin(angleOffset) != Math.sign(this.angleOffset)) {
+                    if (Math.sign(angleOffset) == Math.sign(this.radialVelocity)) {
                         this.radialVelocity = 0;
                     }
                 }
             }
         }
-
-        this.height += this.verticalVelocity * elapsed;
 
         var BOTTOM = -0.2,
             TOP = 7.9;
@@ -182,8 +178,13 @@ var FISHTANK = (function () {
             this.verticalVelocity = 0;
         } else if (this.height > TOP) {
             this.height = TOP;
-            this.verticalVelocity = 0;
+            if (this.verticalVelocity > 0) {
+                this.verticalVelocity = 0;
+            }
         }
+
+        this.height += this.verticalVelocity * elapsed;
+        this.positionAngle = R2.clampAngle(this.positionAngle + this.radialVelocity * elapsed);
 
         this.updatePosition();
     };
