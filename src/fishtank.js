@@ -12,7 +12,7 @@ var FISHTANK = (function () {
 
         this.reset();
 
-        this.radialDistance = 0.7;
+        this.radialDistance = 0.71;
 
         this.turnRate = Math.PI * 0.001;
         this.radialVelocityDecay = 0.000001;
@@ -30,7 +30,7 @@ var FISHTANK = (function () {
         this.pickupSound = new BLORT.Noise("sounds/Pickup01.wav");
 
         this.thing = new BLOB.Thing();
-        this.thing.scaleBy(0.15);
+        this.thing.scaleBy(0.18);
         this.updatePosition();
 
         for (var step = 1; step <= 3; ++step) {
