@@ -259,6 +259,7 @@ var FISHTANK = (function () {
         this.obstacles = [];
         this.urchins = [];
         this.stars = [];
+        this.sandBlump = null;
 
         this.backgroundImages = [];
         this.backgrounds = [];
@@ -299,6 +300,17 @@ var FISHTANK = (function () {
             this.blumps[b].batch(this.batch);
         }
 
+        this.sandBlump = new BLUMP.Blump({
+            resource: "bottom.png",
+            texture: "bottom.jpg",
+            pixelSize: 0.02,
+            depthRange: 0.4,
+            xEdgeMode: 0,
+            yEdgeMode: 0,
+            angle: 0,
+        });
+        this.sandBlump.batch(this.batch);
+
         this.loadState |= BATCH_CAN;
         this.updateBatch();
     };
@@ -325,12 +337,15 @@ var FISHTANK = (function () {
                 textures.push(blump.texture);
             }
         }
-        var image = blumps[0].image,
-            atlas = blumps[0].constructAtlas(textures.length);
+        var atlas = blumps[0].constructAtlas(textures.length);
 
         for (b = 0; b < blumps.length; ++b) {
             blumps[b].construct(atlas, false, false);
         }
+
+        atlas = this.sandBlump.constructAtlas(1);
+        this.sandBlump.construct(atlas, false, false);
+
         this.setupCan(blumps);
         this.finalize();
     };
@@ -360,8 +375,12 @@ var FISHTANK = (function () {
 
     Tank.prototype.finalize = function () {
         console.log("Load completed!");
-        var hOffset = -0.5,
-            angles = [58, 30, 270, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58];
+        var hOffset = 0,
+            angles = [30, 270, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58],
+            sandThing = new BLOB.Thing(this.sandBlump.mesh);
+        this.things.push(sandThing);
+        sandThing.rotate(-Math.PI / 2, new R3.V(1, 0, 0));
+        sandThing.move(new R3.V(0, -0.45, 0));
 
         for (var c = 0; c < this.cans.length; ++c) {
             for (var a = 0; a < angles.length; ++a) {
@@ -369,6 +388,7 @@ var FISHTANK = (function () {
                hOffset = this.cans[c].place(hOffset, angle, this.things, this.obstacles);
             }
         }
+
 
         this.urchinAnim.setup();
         this.starAnim.setup();
@@ -538,7 +558,7 @@ var FISHTANK = (function () {
             room.gl.depthMask(true);
             for (var t = 0; t < this.things.length; ++t) {
                 var thing = this.things[t];
-                if (Math.abs(thing.position.y - eye.y) < drawHeight) {
+                if (t === 0 || Math.abs(thing.position.y - eye.y) < drawHeight) {
                     thing.render(room, this.program, eye);
                 }
             }
