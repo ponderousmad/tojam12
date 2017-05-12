@@ -122,7 +122,8 @@ var FISHTANK = (function () {
         this.positionAngle = R2.clampAngle(this.positionAngle + this.radialVelocity * elapsed);
 
         var collisionSize = 0.2,
-            starSizeSq = 0.15 * 0.15,
+            urchinSizeSq = 0.16 * 0.16,
+            starSizeSq = 0.13 * 0.13,
             collisionSizeSq = collisionSize * collisionSize,
             breaks = 0.005;
 
@@ -151,9 +152,11 @@ var FISHTANK = (function () {
                         this.pickupSound.play();
                     }
                 } else if (obstacle.type === "obsUrchin") {
-                    this.alive = false;
-                    this.deathSound.play();
-                    this.deathAnim = this.deathFlip.setupPlayback(40, false);
+                    if (distanceSq < urchinSizeSq) {
+                        this.alive = false;
+                        this.deathSound.play();
+                        this.deathAnim = this.deathFlip.setupPlayback(40, false);
+                    }
                 } else  {
                     var verticalOffset = this.height - obstacle.position.y,
                         obstacleAngle = Math.atan2(obstacle.z, obstacle.x),
