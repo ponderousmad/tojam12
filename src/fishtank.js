@@ -10,8 +10,6 @@ var FISHTANK = (function () {
     function Jellyfish(idleFlip, swimFlip, deathFlip) {
         this.thing = null;
 
-        this.reset();
-
         this.radialDistance = 0.71;
 
         this.turnRate = Math.PI * 0.001;
@@ -31,7 +29,8 @@ var FISHTANK = (function () {
 
         this.thing = new BLOB.Thing();
         this.thing.scaleBy(0.18);
-        this.updatePosition();
+
+        this.reset();
 
         for (var step = 1; step <= 3; ++step) {
             var noise = new BLORT.Noise("sounds/Swim0" + step + ".wav");
@@ -49,6 +48,7 @@ var FISHTANK = (function () {
         this.deathAnim = null;
         this.alive = true;
         this.sinceDeath = 0;
+        this.updatePosition();
 
         if (obstacles) {
             for (var o = 0; o < obstacles.length; ++o) {
@@ -171,9 +171,7 @@ var FISHTANK = (function () {
 
         var BOTTOM = -0.2,
             TOP = 7.9;
-        if (this.height <= 0 && !this.alive && !this.deathAnim) {
-            this.reset(obstacles);
-        } else if (this.height < BOTTOM) {
+        if (this.height < BOTTOM) {
             this.height = BOTTOM;
             this.verticalVelocity = 0;
         } else if (this.height > TOP) {
@@ -198,6 +196,10 @@ var FISHTANK = (function () {
             qTurn = R3.angleAxisQ(-this.positionAngle, new R3.V(0, 1, 0));
         qTurn.times(qTilt);
         this.thing.setBillboardUp(R3.makeRotateQ(qTurn).transformV(new R3.V(0, 1, 0)));
+    };
+
+    Jellyfish.prototype.isDead = function() {
+        return !this.alive && this.deathAnim === null;
     };
 
     function Obstacle(position, type) {
@@ -241,7 +243,7 @@ var FISHTANK = (function () {
     };
 
     function Tank(viewport, editor) {
-        this.clearColor = [97 / 255, 154 / 255, 130 / 255, 1];
+        this.clearColor = [0,0,0,1];
         this.maximize = viewport === "safe";
         this.updateInDraw = true;
         this.preventDefaultIO = true;
@@ -272,6 +274,7 @@ var FISHTANK = (function () {
         this.urchinAnim = null;
         this.starAnim = null;
 
+        this.tint = 1.0;
         this.gameStarted = false;
         this.music = new BLORT.Tune("sounds/MusicLoop");
     }
@@ -393,7 +396,7 @@ var FISHTANK = (function () {
         waterThing.mesh.texture = this.waterTexture.texture;
         waterThing.rotate(-Math.PI / 2, new R3.V(1, 0, 0));
         waterThing.move(new R3.V(0, 8, 0));
-        waterThing.scaleBy(7);
+        waterThing.scaleBy(10);
 
         for (var c = 0; c < this.cans.length; ++c) {
             for (var a = 0; a < angles.length; ++a) {
@@ -446,7 +449,7 @@ var FISHTANK = (function () {
     Tank.prototype.setupRoom = function (room) {
         this.program = room.programFromElements("vertex-test", "fragment-test", true, false, true);
 
-        room.viewer.near = 0.01;
+        room.viewer.near = 0.05;
         room.viewer.far = 15;
         room.gl.enable(room.gl.CULL_FACE);
         room.gl.blendFunc(room.gl.SRC_ALPHA, room.gl.ONE_MINUS_SRC_ALPHA);
@@ -482,9 +485,21 @@ var FISHTANK = (function () {
         if (elapsed > 100) {
             elapsed = 100;
         }
-        if (this.gameStarted && !this.music.playing) {
-            if (this.music.isLoaded()) {
+        var fadeRate = 0.001;
+        if (this.gameStarted) {
+            if (!this.music.playing && this.music.isLoaded()) {
                 this.music.play();
+            }
+            if (this.jellyfish.isDead()) {
+                this.tint += elapsed * fadeRate;
+                if (this.tint >= 1) {
+                    this.tint = 1;
+                    this.jellyfish.reset(this.obstacles);
+                }
+            } else if (this.tint > 0) {
+                this.tint -= elapsed * fadeRate;
+            } else {
+                this.tint = 0.0;
             }
         }
 
@@ -563,6 +578,10 @@ var FISHTANK = (function () {
         if (this.loadState !== null) {
             return;
         }
+
+        var tintUniform = room.gl.getUniformLocation(this.program.shader, "uTint");
+        room.gl.uniform4f(tintUniform, 0.0, 0.0, 0.0, this.tint);
+
         if (room.viewer.showOnPrimary()) {
             var eye = this.eyePosition(),
                 drawHeight = 3;
@@ -571,7 +590,7 @@ var FISHTANK = (function () {
             room.gl.depthMask(true);
             for (var t = 0; t < this.things.length; ++t) {
                 var thing = this.things[t];
-                if (t === 0 || Math.abs(thing.position.y - eye.y) < drawHeight) {
+                if (t < 2 || Math.abs(thing.position.y - eye.y) < drawHeight) {
                     thing.render(room, this.program, eye);
                 }
             }

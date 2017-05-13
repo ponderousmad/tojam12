@@ -73,8 +73,10 @@
             varying highp vec2 vUV;
             varying lowp vec4 vColor;
             uniform sampler2D uSampler;
+            uniform lowp vec4 uTint;
             void main(void) {
                 mediump vec4 texel = texture2D(uSampler, vec2(vUV.s, vUV.t)) * vColor;
+                texel = vec4(uTint.rgb + texel.rgb * (1.0-uTint.a), texel.a);
                 gl_FragColor = texel;
             }
         </script>
