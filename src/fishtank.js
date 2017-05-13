@@ -511,6 +511,10 @@ var FISHTANK = (function () {
             isLeftTouch = false,
             isRightTouch = false;
 
+        if (halfWidth < halfHeight) {
+            halfHeight = height - halfWidth;
+        }
+
         pointer.touch.filterTouches(function (id, x, y, isStart) {
             if (y < halfHeight) {
                 if (isStart) {
