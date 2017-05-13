@@ -242,7 +242,7 @@ var FISHTANK = (function () {
         return heightOffset + this.height * 0.95;
     };
 
-    function Tank(viewport, editor) {
+    function Tank(viewport, scoreCanvas) {
         this.clearColor = [0,0,0,1];
         this.maximize = viewport === "safe";
         this.updateInDraw = true;
@@ -270,6 +270,11 @@ var FISHTANK = (function () {
 
         this.backgroundImages = [];
         this.backgrounds = [];
+
+        this.scoreCanvas = scoreCanvas;
+        this.scoreContext = scoreCanvas.getContext('2d');
+        this.digits = null;
+        this.scoreBack = null;
 
         this.urchinAnim = null;
         this.starAnim = null;
@@ -320,6 +325,9 @@ var FISHTANK = (function () {
         this.sandBlump.batch(this.batch);
 
         this.waterTexture = this.textureCache.cache("water.jpg");
+
+        this.digits = this.batch.load("digits.png");
+        this.scoreBack = this.batch.load("scoreBack.png");
 
         this.loadState |= BATCH_CAN;
         this.updateBatch();
@@ -477,9 +485,63 @@ var FISHTANK = (function () {
         });
     };
 
+    Tank.prototype.drawScore = function (value, left, top, width, height, srcWidth, srcHeight) {
+        var tens = Math.floor(value / 10),
+            ones = value % 10;
+        if (tens > 0) {
+            this.scoreContext.drawImage(
+                this.digits,
+                srcWidth * tens, 0, srcWidth, srcHeight,
+                left, top, height, width
+            );
+            left += width * 0.8;
+        } else {
+            left += width * 0.4;
+        }
+        this.scoreContext.drawImage(
+            this.digits,
+            srcWidth * ones, 0, srcWidth, srcHeight,
+            left, top, height, width
+        );
+    };
+
+    Tank.prototype.updateScore = function (width, height) {
+        width = Math.round(Math.max(width * 0.15, 150));
+        height = Math.round(this.scoreCanvas.width * this.scoreBack.height / this.scoreBack.width);
+
+        var starCount = this.stars.length,
+            collected = 0,
+            srcWidth = this.digits.width / 10,
+            srcHeight = this.digits.height,
+            digitHeight = height * 0.5,
+            digitWidth = digitHeight * srcWidth / srcHeight;
+        for (var s = 0; s < starCount; ++s) {
+            if (this.stars[s].collected) {
+                ++collected;
+            }
+        }
+        var scoreData = JSON.stringify({w: width, h: height, stars: starCount, collected: collected});
+        if (this.scoreData === scoreData) {
+            return;
+        }
+        this.scoreData = scoreData;
+
+        this.scoreCanvas.width = width;
+        this.scoreCanvas.height = height;
+        this.scoreContext.clearRect(0, 0, width, height);
+        this.scoreContext.drawImage(this.scoreBack, 0, 0, width, height);
+
+        this.drawScore(collected, width *-0.02, height * 0.05, digitWidth, digitHeight, srcWidth, srcHeight);
+        this.drawScore(starCount, width * 0.45, height * 0.30, digitWidth, digitHeight, srcWidth, srcHeight);
+    };
+
     Tank.prototype.update = function (now, elapsed, keyboard, pointer, width, height) {
         if (this.loadState !== null) {
             return;
+        }
+
+        if (this.gameStarted) {
+            this.updateScore(width, height);
         }
 
         if (elapsed > 100) {
@@ -632,7 +694,8 @@ var FISHTANK = (function () {
         if (MAIN.runTestSuites() === 0) {
             console.log("All Tests Passed!");
         }
-        MAIN.start(document.getElementById("canvas3D"), new Tank("safe"));
+        var score = document.getElementById("score");
+        MAIN.start(document.getElementById("canvas3D"), new Tank("safe", score));
         gravitySlider = document.getElementById("gravity");
         velocitySlider = document.getElementById("velocity");
         dragSlider = document.getElementById("drag");
