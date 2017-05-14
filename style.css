@@ -12,14 +12,45 @@ html, body {
     display: flex;
 }
 
-.popup {
+.overlay {
+    left: 0%;
+    top: 0%;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.centeredHigh {
    left:50%;
-   top:50%;
+   top:30%;
    transform: translate(-50%, -50%);
    -webkit-transform: translate(-50%, -50%);
    -moz-transform: translate(-50%, -50%);
    position: absolute;
-   display: none;
+}
+
+.centeredLow {
+   left:50%;
+   top:70%;
+   transform: translate(-50%, -50%);
+   -webkit-transform: translate(-50%, -50%);
+   -moz-transform: translate(-50%, -50%);
+   position: absolute;
+}
+
+.topLeft {
+   left:0%;
+   top:0%;
+   position: absolute;
+}
+
+.bottomCenter {
+    left: 50%;
+    top: 100%;
+   transform: translate(-50%, -200%);
+   -webkit-transform: translate(-50%, -200%);
+   -moz-transform: translate(-50%, -200%);
+   position: absolute;
 }
 
 .score {
