@@ -26,11 +26,22 @@
             <canvas id="canvas3D" width="800" height="600">
                 Sorry, your browser doesn't support the &lt;canvas&gt; element.
             </canvas>
-            <div class="popup" id="loading">
-                <img src="images/jelly.png" alt="Title: Jelly">
-            </div>
             <canvas class="score" id="score" width="80" height="60">
             </canvas>
+            <div class="overlay hidden">
+                <div class="centeredHigh" id="title">
+                    <img src="images/title.png" alt="Title: Jelly Jelly">
+                </div>
+                <div class="topLeft" id="tojam">
+                    <img src="images/tojam.png" alt="T.O.Jam What Twelves Below">
+                </div>
+                <div class="centeredLow" id="instructions">
+                    <img src="images/instructions.png" alt="Instructions">
+                </div>
+                <div class="bottomCenter" id="credits">
+                    <img src="images/credits.png" alt="Credits">
+                </div>
+            </div>
         </div>
         <div class="controls" id="controls">
             <div class="menuBorder">
@@ -39,19 +50,44 @@
                 </div>
             </div>
                 <form>
-                    <div class="">
-                        <div>Gravity:</div>
-                        <input id="gravity" class="rangeSlider" type="range" min="0.01" max="200" step="0.01" value="30">
+                    <div>
+                        <div class="slider">
+                            <div class="beside">Gravity:</div>
+                            <input type="number" class="linearValue" id="valueGravity">
+                            <input id="sliderGravity" class="linearSlider" type="range" min="0.01" max="200" step="0.01">
+                        </div>
+                        <div class="slider">
+                            <div class="beside">Velocity:</div>
+                            <input type="number" class="linearValue" id="valueVelocity">
+                            <input id="sliderVelocity" class="linearSlider" type="range" min="0.01" max="200" step="0.01">
+                        </div>
+                        <div class="slider">
+                            <div class="beside">Drag:</div>
+                            <input type="number" class="linearValue" id="valueDrag">
+                            <input id="sliderDrag" class="linearSlider" type="range" min="0.01" max="200" step="0.01">
+                        </div>
+                        <div>
+                            <span>
+                                Obstacles:
+                                <select name="select" id="selectObstacle">
+                                </select>
+                            </span>
+                            <div class="slider">
+                                <div class="beside">Angle:</div>
+                                <input type="number" class="angleValue" id="valueAngle">
+                                <input class="angleSlider" id="sliderAngle" type="range" min="-180" max= "180" value="0">
+                            </div>
+                            <div class="slider">
+                                <div class="beside">Height:</div>
+                                <input type="number" class="linearValue" id="valueHeight">
+                                <input class="linearSlider" id="sliderHeight" type="range" min="-0.05" max= "8" step="0.001" value="0">
+                            </div>
+                        </div>
                     </div>
-                    <div class="">
-                        <div>Velocity:</div>
-                        <input id="velocity" class="rangeSlider" type="range" min="0.01" max="200" step="0.01" value="50">
-                    </div>
-                    <div class="">
-                        <div>Drag:</div>
-                        <input id="drag" class="rangeSlider" type="range" min="0.01" max="200" step="0.01" value="40">
-                    </div>
+                    <button id="buttonClipboard" type="button">Copy To Clipboard</button>
                 </form>
+                <textarea id="textData" rows="10" cols="34">
+                </textarea>
             </div>
         </div>
         <script type="text/javascript">

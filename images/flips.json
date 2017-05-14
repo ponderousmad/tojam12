@@ -387,35 +387,6 @@
     ],
     "star": [
         {
-            "image": "spriteAtlas0.png",
-            "frames": [
-                {
-                    "uMin": 0,
-                    "vMin": 0.75,
-                    "uSize": 0.25,
-                    "vSize": 0.25
-                },
-                {
-                    "uMin": 0.25,
-                    "vMin": 0.75,
-                    "uSize": 0.25,
-                    "vSize": 0.25
-                },
-                {
-                    "uMin": 0.5,
-                    "vMin": 0.75,
-                    "uSize": 0.25,
-                    "vSize": 0.25
-                },
-                {
-                    "uMin": 0.75,
-                    "vMin": 0.75,
-                    "uSize": 0.25,
-                    "vSize": 0.25
-                }
-            ]
-        },
-        {
             "image": "spriteAtlas1.png",
             "frames": [
                 {
@@ -499,6 +470,90 @@
                 {
                     "uMin": 0.25,
                     "vMin": 0.75,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.75,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.75,
+                    "vMin": 0.75,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                }
+            ]
+        },
+        {
+            "image": "spriteAtlas2.png",
+            "frames": [
+                {
+                    "uMin": 0,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                }
+            ]
+        }
+    ],
+    "starDie": [
+        {
+            "image": "spriteAtlas2.png",
+            "frames": [
+                {
+                    "uMin": 0.5,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.75,
+                    "vMin": 0,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.5,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.75,
+                    "vMin": 0.25,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0,
+                    "vMin": 0.5,
+                    "uSize": 0.25,
+                    "vSize": 0.25
+                },
+                {
+                    "uMin": 0.25,
+                    "vMin": 0.5,
                     "uSize": 0.25,
                     "vSize": 0.25
                 }

@@ -8,10 +8,6 @@ html, body {
     background-color: black;
 }
 
-.slider {
-    display: flex;
-}
-
 .overlay {
     left: 0%;
     top: 0%;
@@ -22,7 +18,7 @@ html, body {
 
 .centeredHigh {
    left:50%;
-   top:30%;
+   top:35%;
    transform: translate(-50%, -50%);
    -webkit-transform: translate(-50%, -50%);
    -moz-transform: translate(-50%, -50%);
@@ -31,7 +27,7 @@ html, body {
 
 .centeredLow {
    left:50%;
-   top:70%;
+   top:75%;
    transform: translate(-50%, -50%);
    -webkit-transform: translate(-50%, -50%);
    -moz-transform: translate(-50%, -50%);
@@ -47,9 +43,9 @@ html, body {
 .bottomCenter {
     left: 50%;
     top: 100%;
-   transform: translate(-50%, -200%);
-   -webkit-transform: translate(-50%, -200%);
-   -moz-transform: translate(-50%, -200%);
+   transform: translate(-50%, -100%);
+   -webkit-transform: translate(-50%, -100%);
+   -moz-transform: translate(-50%, -100%);
    position: absolute;
 }
 
@@ -59,8 +55,30 @@ html, body {
     position:absolute;
 }
 
-.rangeSlider {
-    width: 180px;
+.beside {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.angleSlider {
+    width: 250px;
+    margin-right: 30px;
+}
+
+.angleValue {
+    width: 100px;
+    float: right;
+    margin-right: 30px;
+}
+
+.linearSlider {
+    width: 250px;
+    margin-right: 30px;
+}
+
+.linearValue {
+    width: 100px;
+    float: right;
     margin-right: 30px;
 }
 
@@ -98,11 +116,11 @@ html, body {
 }
 
 .slideIn {
-    -webkit-transform: translate(-225px,0px);
-    -moz-transform: translate(-225px,0px);
-    -o-transform: translate(-225px,0px);
-    -ms-transform: translate(-225px,0px);
-    transform: translate(-225px,0px);
+    -webkit-transform: translate(-275px,0px);
+    -moz-transform: translate(-275px,0px);
+    -o-transform: translate(-275px,0px);
+    -ms-transform: translate(-275px,0px);
+    transform: translate(-275px,0px);
 }
 
 .hidden {

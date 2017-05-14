@@ -1,9 +1,9 @@
 var FISHTANK = (function () {
     "use strict";
 
-    var gravitySlider = null,
-        velocitySlider = null,
-        dragSlider = null,
+    var gravityValue = 30,
+        velocityValue = 50,
+        dragValue = 40,
         BATCH_CAN = 1,
         BATCH_FLIPS = 2;
 
@@ -62,9 +62,9 @@ var FISHTANK = (function () {
 
     Jellyfish.prototype.update = function (started, elapsed, swim, steer, obstacles) {
         var animElapsed = elapsed,
-            gravity = this.gravity * parseFloat(gravitySlider.value) / 100,
-            velocity = this.swimVelocity * parseFloat(velocitySlider.value) / 100,
-            velocityDrag = this.radialVelocityDecay * parseFloat(dragSlider.value) / 100;
+            gravity = this.gravity * parseFloat(gravityValue) / 100,
+            velocity = this.swimVelocity * parseFloat(velocityValue) / 100,
+            velocityDrag = this.radialVelocityDecay * parseFloat(dragValue) / 100;
         if (!started) {
             elapsed = 0;
         }
@@ -123,7 +123,8 @@ var FISHTANK = (function () {
             urchinSizeSq = 0.16 * 0.16,
             starSizeSq = 0.13 * 0.13,
             collisionSizeSq = collisionSize * collisionSize,
-            breaks = 0.005;
+            breaks = 0.005,
+            collectedStar = null;
 
         if (!this.alive && !this.deathAnim && this.verticalVelocity > 0) {
             this.verticalVelocity = 0;
@@ -146,6 +147,7 @@ var FISHTANK = (function () {
                     this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
                 } else if (obstacle.type === "obsStar") {
                     if (distanceSq < starSizeSq && obstacle.thing && !obstacle.thing.collected) {
+                        collectedStar = obstacle;
                         obstacle.thing.collected = true;
                         this.pickupSound.play();
                     }
@@ -185,6 +187,8 @@ var FISHTANK = (function () {
         this.positionAngle = R2.clampAngle(this.positionAngle + this.radialVelocity * elapsed);
 
         this.updatePosition();
+
+        return collectedStar;
     };
 
     Jellyfish.prototype.updatePosition = function () {
@@ -278,11 +282,153 @@ var FISHTANK = (function () {
 
         this.urchinAnim = null;
         this.starAnim = null;
+        this.dyingStar = null;
 
         this.tint = 1.0;
         this.gameStarted = false;
         this.music = new BLORT.Tune("sounds/MusicLoop");
+
+        this.activeObstacle = null;
+
+        this.setupControls();
     }
+
+    Tank.prototype.setupControls = function () {
+        function setupSlider(idBase, handleChange) {
+            var slider = document.getElementById("slider" + idBase),
+                value = document.getElementById("value" + idBase);
+            if (slider) {
+                slider.addEventListener("input", function (e) {
+                    if (value) {
+                        value.value = slider.value;
+                    }
+                    handleChange(parseFloat(slider.value));
+                });
+            }
+            if (value) {
+                value.addEventListener("change", function (e) {
+                    if (!isNaN(value.value)) {
+                        if (slider) {
+                            slider.value = value.value;
+                        }
+                        handleChange(parseFloat(value.value));
+                    }
+                });
+            }
+
+            return function(initialValue) {
+                if (value) { value.value = initialValue; }
+                if (slider) { slider.value = initialValue; }
+            };
+        }
+
+        setupSlider("Gravity", function (value) { gravityValue = value; })(gravityValue);
+        setupSlider("Velocity", function (value) { velocityValue = value; })(velocityValue);
+        setupSlider("Drag", function (value) { dragValue = value; })(dragValue);
+
+        var self = this;
+        this.selectObstacle = document.getElementById("selectObstacle");
+        this.initObstacleAngle = setupSlider("Angle", function (value) { self.setObstacleAngle(value); });
+        this.initObstacleHeight = setupSlider("Height", function (value) { self.setObstacleHeight(value); });
+
+        if (this.selectObstacle) {
+            this.selectObstacle.addEventListener("change", function (e) {
+                self.activeObstacle = self.obstacles[parseInt(self.selectObstacle.value)];
+                self.connectObstacleControls();
+            }, true);
+        }
+
+        var clipboardButton = document.getElementById("buttonClipboard");
+        if (clipboardButton) {
+            this.editArea = document.getElementById("textData");
+            clipboardButton.addEventListener("click", function(e) {
+                self.editArea.value = self.save();
+                self.editArea.select();
+                self.editArea.focus();
+                document.execCommand("copy");
+            }, true);
+        }
+    };
+
+    Tank.prototype.connectSelectObstacles = function () {
+        if (this.selectObstacle) {
+            this.selectObstacle.innerHTML = "";
+
+
+            var starCount = 0,
+                urchinCount = 0,
+                self =  this,
+                addObstacles = function (type) {
+                    for (var o = 0; o < self.obstacles.length; ++o) {
+                        var obstacle = self.obstacles[o],
+                            name = null;
+                        if (obstacle.type !== type) {
+                            continue;
+                        }
+                        if (obstacle.type === "obsStar") {
+                            ++starCount;
+                            name = "Star " + starCount;
+                        } else if (obstacle.type == "obsUrchin") {
+                            ++urchinCount;
+                            name = "Urchin " + urchinCount;
+                        }
+                        if (name) {
+                            self.selectObstacle.appendChild(new Option(name, o));
+                        }
+                    }
+                };
+
+            addObstacles("obsStar");
+            addObstacles("obsUrchin");
+        }
+    };
+
+    Tank.prototype.setObstacleAngle = function (value) {
+        if (this.activeObstacle) {
+        }
+    };
+
+    Tank.prototype.setObstacleHeight = function (value) {
+        if (this.activeObstacle) {
+            this.activeObstacle.position.y = value;
+            this.activeObstacle.thing.position.y = value;
+        }
+    };
+
+    Tank.prototype.connectObstacleControls = function () {
+        if (this.activeObstacle) {
+            var angle = R2.clampAngle(Math.atan2(this.activeObstacle.position.z, this.activeObstacle.position.x));
+            this.initObstacleHeight(this.activeObstacle.position.y);
+            this.initObstacleAngle(angle * R2.RAD_TO_DEG);
+        }
+    };
+
+    Tank.prototype.save = function () {
+        var data = {
+            gravity: gravityValue,
+            velocity: velocityValue,
+            drag: dragValue,
+            stars: [],
+            urchins: []
+        };
+
+        for (var o = 0; o < this.obstacles.length; ++o) {
+            var obstacle = this.obstacles[o],
+                angle = R2.clampAngle(Math.atan2(obstacle.position.z, obstacle.position.x)),
+                entry = {
+                    angle: (angle * R2.RAD_TO_DEG).toFixed(2),
+                    height: obstacle.position.y.toFixed(3)
+                };
+            if (obstacle.type === "obsStar") {
+                data.stars.push(entry);
+            }
+            if (obstacle.type === "obsUrchin") {
+                data.urchins.push(entry);
+            }
+        }
+
+        return JSON.stringify(data, null, 4);
+    };
 
     Tank.prototype.batchAnimations = function (data) {
         this.jellyfish = new Jellyfish(
@@ -293,6 +439,7 @@ var FISHTANK = (function () {
 
         this.urchinAnim = new BLOB.Flip(data.urchy, this.textureCache).setupPlayback(50, true);
         this.starAnim = new BLOB.Flip(data.star, this.textureCache).setupPlayback(50, true);
+        this.starDieFlip = new BLOB.Flip(data.starDie, this.textureCache);
         this.loadState |= BATCH_FLIPS;
         this.updateBatch();
     };
@@ -413,9 +560,9 @@ var FISHTANK = (function () {
             }
         }
 
-
         this.urchinAnim.setup();
         this.starAnim.setup();
+        this.starDieFlip.constructMeshes();
         this.jellyfish.idleAnim.setup();
         this.jellyfish.swimFlip.constructMeshes();
         this.jellyfish.deathFlip.constructMeshes();
@@ -434,6 +581,7 @@ var FISHTANK = (function () {
                 urchin.scaleBy(0.15);
                 urchin.setBillboardUp(new R3.V(0, 1, 0));
                 this.urchins.push(urchin);
+                obstacle.thing = urchin;
             }
             if (obstacle.type === "obsStar") {
                 var star = new BLOB.Thing(),
@@ -451,6 +599,7 @@ var FISHTANK = (function () {
                 obstacle.thing = star;
             }
         }
+        this.connectSelectObstacles();
         this.gameStarted = true;
     };
 
@@ -628,9 +777,22 @@ var FISHTANK = (function () {
             thing.update(elapsed);
         }
 
-        this.jellyfish.update(this.gameStarted, elapsed, swim, steer, this.obstacles);
+        var collected = this.jellyfish.update(this.gameStarted, elapsed, swim, steer, this.obstacles);
         this.towerRotation = this.jellyfish.positionAngle;
         this.eyeHeight = this.jellyfish.height;
+
+        if (collected) {
+            if (this.dyingStar) {
+                this.dyingStar.thing.dieAnim = null;
+            }
+            collected.thing.dieAnim = this.starDieFlip.setupPlayback(50, false);
+            this.dyingStar = collected;
+        }
+
+        if (this.dyingStar && this.dyingStar.thing.dieAnim.update(elapsed)) {
+            this.dyingStar.thing.dieAnim = null;
+            this.dyingStar = null;
+        }
     };
 
     Tank.prototype.eyePosition = function () {
@@ -689,6 +851,13 @@ var FISHTANK = (function () {
                 }
             }
 
+            if (this.dyingStar) {
+                starMesh = this.dyingStar.thing.dieAnim.mesh();
+                room.bindMeshGeometry(starMesh, this.program);
+                room.bindMeshTexture(starMesh, this.program);
+                room.drawMeshElements(starMesh, this.program, this.dyingStar.thing.renderTransform(eye));
+            }
+
             // Need to draw billboards last for alpha blending to work.
             this.jellyfish.thing.render(room, this.program, eye);
         }
@@ -700,9 +869,6 @@ var FISHTANK = (function () {
         }
         var score = document.getElementById("score");
         MAIN.start(document.getElementById("canvas3D"), new Tank("safe", score));
-        gravitySlider = document.getElementById("gravity");
-        velocitySlider = document.getElementById("velocity");
-        dragSlider = document.getElementById("drag");
     }
 
     return {
