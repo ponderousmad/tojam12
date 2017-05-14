@@ -316,7 +316,7 @@ var FISHTANK = (function () {
         this.sandBlump = new BLUMP.Blump({
             resource: "bottom.png",
             texture: "bottom.jpg",
-            pixelSize: 0.02,
+            pixelSize: 0.04,
             depthRange: 0.4,
             xEdgeMode: 0,
             yEdgeMode: 0,
