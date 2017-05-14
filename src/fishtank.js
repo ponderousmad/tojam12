@@ -354,7 +354,6 @@ var FISHTANK = (function () {
         if (this.selectObstacle) {
             this.selectObstacle.innerHTML = "";
 
-
             var starCount = 0,
                 urchinCount = 0,
                 self =  this,
@@ -867,8 +866,11 @@ var FISHTANK = (function () {
         if (MAIN.runTestSuites() === 0) {
             console.log("All Tests Passed!");
         }
-        var score = document.getElementById("score");
-        MAIN.start(document.getElementById("canvas3D"), new Tank("safe", score));
+        var score = document.getElementById("score"),
+            canvas = document.getElementById("canvas3D"),
+            tank = new Tank("safe", score);
+        tank.inputElement = document;
+        MAIN.start(canvas, tank);
     }
 
     return {
