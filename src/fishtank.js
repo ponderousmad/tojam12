@@ -286,6 +286,7 @@ var FISHTANK = (function () {
 
         this.tint = 1.0;
         this.gameStarted = false;
+        this.titleState = null;
         this.music = new BLORT.Tune("sounds/MusicLoop");
 
         this.activeObstacle = null;
@@ -347,6 +348,17 @@ var FISHTANK = (function () {
                 self.editArea.focus();
                 document.execCommand("copy");
             }, true);
+        }
+
+        this.overlay = document.getElementById("overlay");
+        this.overlay.addEventListener("click", function (e) {
+            self.clickOverlay();
+        }, true);
+    };
+
+    Tank.prototype.clickOverlay = function () {
+        if (this.titleState !== null && this.titleState > 1) {
+            this.titleState = 1;
         }
     };
 
@@ -511,7 +523,6 @@ var FISHTANK = (function () {
         this.sandBlump.construct(atlas, false, false);
 
         this.setupCan(blumps);
-        this.finalize();
     };
 
     Tank.prototype.setupCan = function (blumps) {
@@ -599,7 +610,8 @@ var FISHTANK = (function () {
             }
         }
         this.connectSelectObstacles();
-        this.gameStarted = true;
+
+        this.loadState = null;
     };
 
     Tank.prototype.setupRoom = function (room) {
@@ -615,7 +627,7 @@ var FISHTANK = (function () {
         this.batch = new BLIT.Batch("images/", function() {
             self.constructBlumps();
             self.setupBackgrounds();
-            self.loadState = null;
+            self.finalize();
         });
 
         this.backgroundImages.push(this.batch.load("bg.jpg"));
@@ -688,19 +700,54 @@ var FISHTANK = (function () {
     };
 
     Tank.prototype.update = function (now, elapsed, keyboard, pointer, width, height) {
+        if (elapsed > 100) {
+            elapsed = 100;
+        }
+
         if (this.loadState !== null) {
             return;
         }
 
-        if (this.gameStarted) {
-            this.updateScore(width, height);
+        var swim = false,
+            steer = 0,
+            halfHeight = height / 2,
+            halfWidth = width / 2,
+            isSwimTouch = false,
+            isLeftTouch = false,
+            isRightTouch = false,
+            fadeRate = 0.001;
+
+        if (halfWidth < halfHeight) {
+            halfHeight = height - halfWidth;
         }
 
-        if (elapsed > 100) {
-            elapsed = 100;
-        }
-        var fadeRate = 0.001;
-        if (this.gameStarted) {
+        if (!this.gameStarted) {
+            if (this.titleState === null) {
+                this.titleState = 2;
+                var loading = document.getElementById("loading"),
+                    instructions = document.getElementById("instructions");
+                loading.classList.add("hidden");
+                instructions.classList.remove("hidden");
+            } else if (this.titleState > 1) {
+                if (keyboard.keysDown() > 0 || pointer.activated()) {
+                    this.titleState = 1;
+                }
+            } else {
+                this.titleState -= elapsed * 0.001;
+                if (this.titleState <= 0) {
+                    this.titleState = 0;
+                    this.gameStarted = true;
+                    this.overlay.classList.add("hidden");
+                } else {
+                    this.overlay.style.opacity = this.titleState;
+                }
+            }
+            if (this.tint > 0.5) {
+                this.tint -= elapsed * fadeRate;
+            }
+        } else {
+            this.updateScore(width, height);
+
             if (!this.music.playing && this.music.isLoaded()) {
                 this.music.play();
             }
@@ -715,61 +762,49 @@ var FISHTANK = (function () {
             } else {
                 this.tint = 0.0;
             }
-        }
 
-        var swim = false,
-            steer = 0,
-            halfHeight = height / 2,
-            halfWidth = width / 2,
-            isSwimTouch = false,
-            isLeftTouch = false,
-            isRightTouch = false;
-
-        if (halfWidth < halfHeight) {
-            halfHeight = height - halfWidth;
-        }
-
-        pointer.touch.filterTouches(function (id, x, y, isStart) {
-            if (y < halfHeight) {
-                if (isStart) {
-                    isSwimTouch = true;
-                }
-            } else {
-                if (x < halfWidth) {
-                    isLeftTouch = true;
+            pointer.touch.filterTouches(function (id, x, y, isStart) {
+                if (y < halfHeight) {
+                    if (isStart) {
+                        isSwimTouch = true;
+                    }
                 } else {
-                    isRightTouch = true;
+                    if (x < halfWidth) {
+                        isLeftTouch = true;
+                    } else {
+                        isRightTouch = true;
+                    }
+                }
+            });
+
+            if (keyboard.wasKeyPressed(IO.KEYS.Space) ||
+                keyboard.wasKeyPressed(IO.KEYS.Up) ||
+                keyboard.wasAsciiPressed("W") ||
+                (pointer.activated() && pointer.primary.y < halfHeight) ||
+                isSwimTouch
+            ) {
+                if (this.gameStarted) {
+                    swim = true;
                 }
             }
-        });
+            if (keyboard.isKeyDown(IO.KEYS.Left) ||
+                keyboard.isAsciiDown("A") ||
+                (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x < halfWidth) ||
+                isLeftTouch
+            ) {
+                steer = 1;
+            }
+            if (keyboard.isKeyDown(IO.KEYS.Right) ||
+                keyboard.isAsciiDown("D") ||
+                (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x > halfWidth) ||
+                isRightTouch
+            ) {
+                steer = -1;
+            }
+        }
 
         this.urchinAnim.update(elapsed);
         this.starAnim.update(elapsed);
-
-        if (keyboard.wasKeyPressed(IO.KEYS.Space) ||
-            keyboard.wasKeyPressed(IO.KEYS.Up) ||
-            keyboard.wasAsciiPressed("W") ||
-            (pointer.activated() && pointer.primary.y < halfHeight) ||
-            isSwimTouch
-        ) {
-            if (this.gameStarted) {
-                swim = true;
-            }
-        }
-        if (keyboard.isKeyDown(IO.KEYS.Left) ||
-            keyboard.isAsciiDown("A") ||
-            (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x < halfWidth) ||
-            isLeftTouch
-        ) {
-            steer = 1;
-        }
-        if (keyboard.isKeyDown(IO.KEYS.Right) ||
-            keyboard.isAsciiDown("D") ||
-            (pointer.primary && pointer.primary.y > halfHeight && pointer.primary.x > halfWidth) ||
-            isRightTouch
-        ) {
-            steer = -1;
-        }
 
         for (var t = 0; t < this.things.length; ++t) {
             var thing = this.things[t];
@@ -871,6 +906,12 @@ var FISHTANK = (function () {
             tank = new Tank("safe", score);
         tank.inputElement = document;
         MAIN.start(canvas, tank);
+
+        window.addEventListener("mouseDown", function(e) {
+            window.focus();
+            e.preventDefault();
+            e.stopPropagation();
+        }, true);
     }
 
     return {
