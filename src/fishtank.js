@@ -485,23 +485,25 @@ var FISHTANK = (function () {
         });
     };
 
-    Tank.prototype.drawScore = function (value, left, top, width, height, srcWidth, srcHeight) {
+    Tank.prototype.drawScore = function (value, left, top, width, height, srcWidth, srcHeight, tint) {
         var tens = Math.floor(value / 10),
             ones = value % 10;
         if (tens > 0) {
-            this.scoreContext.drawImage(
-                this.digits,
-                srcWidth * tens, 0, srcWidth, srcHeight,
-                left, top, height, width
+            BLIT.tinted(
+                this.scoreContext, this.digits,
+                left, top, height, width,
+                tint, false,
+                srcWidth * tens, 0, srcWidth, srcHeight
             );
-            left += width * 0.8;
+            left += width;
         } else {
             left += width * 0.4;
         }
-        this.scoreContext.drawImage(
-            this.digits,
-            srcWidth * ones, 0, srcWidth, srcHeight,
-            left, top, height, width
+        BLIT.tinted(
+            this.scoreContext, this.digits,
+            left, top, height, width,
+            tint, false,
+            srcWidth * ones, 0, srcWidth, srcHeight
         );
     };
 
@@ -531,8 +533,10 @@ var FISHTANK = (function () {
         this.scoreContext.clearRect(0, 0, width, height);
         this.scoreContext.drawImage(this.scoreBack, 0, 0, width, height);
 
-        this.drawScore(collected, width *-0.02, height * 0.05, digitWidth, digitHeight, srcWidth, srcHeight);
-        this.drawScore(starCount, width * 0.45, height * 0.30, digitWidth, digitHeight, srcWidth, srcHeight);
+        this.drawScore(collected, width * 0.05, height * 0.15, digitWidth, digitHeight, srcWidth, srcHeight, [1,1,1]);
+        digitHeight *= 0.8;
+        digitWidth *= 0.8;
+        this.drawScore(starCount, width * 0.55, height * 0.50, digitWidth, digitHeight, srcWidth, srcHeight, [1,0.5,0.1]);
     };
 
     Tank.prototype.update = function (now, elapsed, keyboard, pointer, width, height) {
