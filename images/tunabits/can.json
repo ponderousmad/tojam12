@@ -1,5 +1,5 @@
 {
-    "gravity": 30,
+    "gravity": 10,
     "velocity": 50,
     "drag": 40,
     "pixelSize": 0.004,
@@ -12,7 +12,14 @@
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "xEdgeMode": 2,
-            "angle": 0
+            "angle": 0,
+            "POIs" : [
+                {
+                    "x": 127,
+                    "y": 75,
+                    "type": "obstacleSmall"
+                }
+            ]
         },
         {
             "resource": "tunabits/tuna_depth2.png",
@@ -23,9 +30,9 @@
             "angle": 45,
             "POIs" : [
                 {
-                    "x": 10,
-                    "y": 70,
-                    "type": "obstacle"
+                    "x": 16,
+                    "y": 55,
+                    "type": "obstacleSmall"
                 }
             ]
         },

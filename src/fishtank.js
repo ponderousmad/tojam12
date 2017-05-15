@@ -1,9 +1,9 @@
 var FISHTANK = (function () {
     "use strict";
 
-    var gravityValue = 30,
-        velocityValue = 50,
-        dragValue = 40,
+    var gravityValue = 100,
+        velocityValue = 100,
+        dragValue = 100,
         BATCH_CAN = 1,
         BATCH_FLIPS = 2,
         TITLE_INSTRUCTIONS = 2,
@@ -17,7 +17,7 @@ var FISHTANK = (function () {
         this.radialDistance = 0.71;
 
         this.turnRate = Math.PI * 0.001;
-        this.radialVelocityDecay = 0.000001;
+        this.radialVelocityDecay = 5;
         this.gravity = 0.000001;
         this.swimVelocity = 0.001;
 
@@ -104,6 +104,11 @@ var FISHTANK = (function () {
             this.swimAnim = this.swimFlip.setupPlayback(20, false);
         }
 
+        var vVel = this.verticalVelocity,
+            hVel = this.radialVelocity * this.radialDistance,
+            totalVel = Math.sqrt(vVel * vVel + hVel * hVel),
+            drag = totalVel * velocityDrag * elapsed; 
+
         var mesh = null;
         if (this.deathAnim) {
             mesh = this.deathAnim.mesh();
@@ -117,13 +122,14 @@ var FISHTANK = (function () {
 
         var direction = Math.sign(this.radialVelocity);
         if (direction) {
-            this.radialVelocity -= direction * elapsed * velocityDrag;
+            this.radialVelocity -= this.radialVelocity * drag;
             if (Math.sign(this.radialVelocity) !== direction) {
                 this.radialVelocity = 0;
             }
         }
 
-        var collisionSize = 0.2,
+        var collisionSize = 0.22,
+            collisionSizeSmallSq = 0.18 * 0.18,
             urchinSizeSq = 0.16 * 0.16,
             starSizeSq = 0.13 * 0.13,
             collisionSizeSq = collisionSize * collisionSize,
@@ -133,7 +139,11 @@ var FISHTANK = (function () {
         if (!this.alive && !this.deathAnim && this.verticalVelocity > 0) {
             this.verticalVelocity = 0;
         } else if (this.height > 0) {
+            var slowBy = this.verticalVelocity * drag;
             this.verticalVelocity -= gravity * elapsed;
+            if (Math.abs(slowBy) > Math.abs(this.verticalVelocity)) {
+                this.verticalVelocity = 0;
+            }
         } else {
             this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
         }
@@ -161,7 +171,7 @@ var FISHTANK = (function () {
                         this.deathSound.play();
                         this.deathAnim = this.deathFlip.setupPlayback(40, false);
                     }
-                } else  {
+                } else if (obstacle.type === "obstacle" || distanceSq < collisionSizeSmallSq) {
                     var verticalOffset = this.height - obstacle.position.y,
                         obstacleAngle = Math.atan2(obstacle.position.z, obstacle.position.x),
                         angleOffset = R2.clampAngle(obstacleAngle - this.positionAngle);
@@ -169,13 +179,13 @@ var FISHTANK = (function () {
                         this.verticalVelocity = 0;
                     }
                     if (Math.sign(angleOffset) == Math.sign(this.radialVelocity)) {
-                        this.radialVelocity = 0;
+                        this.radialVelocity = -this.radialVelocity * 0.25;
                     }
                 }
             }
         }
 
-        var BOTTOM = -0.2,
+        var BOTTOM = -0.1,
             TOP = 7.9;
         if (this.height < BOTTOM) {
             this.height = BOTTOM;
