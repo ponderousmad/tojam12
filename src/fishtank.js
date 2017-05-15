@@ -8,6 +8,9 @@ var FISHTANK = (function () {
         BATCH_FLIPS = 2,
         TITLE_INSTRUCTIONS = 2,
         TITLE_FADE_START = 1,
+        WIN_TIME = 5,
+        WIN_CAN_SKIP = 4,
+        WIN_FADE_START = 1,
         STAR_OFFSET = 0.72,
         URCHIN_OFFSET = 0.78;
 
@@ -108,8 +111,6 @@ var FISHTANK = (function () {
             hVel = this.radialVelocity * this.radialDistance,
             totalVel = Math.sqrt(vVel * vVel + hVel * hVel),
             drag = totalVel * velocityDrag * elapsed;
-
-        console.log(totalVel, drag);
 
         var mesh = null;
         if (this.deathAnim) {
@@ -306,7 +307,10 @@ var FISHTANK = (function () {
         this.gameStarted = false;
         this.editing = false;
         this.titleState = null;
+        this.winState = null;
         this.music = new BLORT.Tune("sounds/MusicLoop");
+        this.winSound = new BLORT.Noise("sounds/Win01.wav");
+        this.winCount = 17;
 
         this.activeObstacle = null;
 
@@ -387,6 +391,11 @@ var FISHTANK = (function () {
             self.clickOverlay();
         }, true);
 
+        this.winOverlay = document.getElementById("win");
+        this.winOverlay.addEventListener("click", function (e) {
+            self.clickWin();
+        }, true);
+
         var editToggle = document.getElementById("buttonEdit");
         if (editToggle) {
             editToggle.addEventListener("click", function (e) {
@@ -404,6 +413,12 @@ var FISHTANK = (function () {
     Tank.prototype.clickOverlay = function () {
         if (this.titleState === TITLE_INSTRUCTIONS) {
             this.titleState = TITLE_FADE_START;
+        }
+    };
+
+    Tank.prototype.clickWin = function () {
+        if (!isNaN(this.winState) && this.winState > WIN_FADE_START && this.winState < WIN_CAN_SKIP) {
+            this.winState = WIN_FADE_START;
         }
     };
 
@@ -576,7 +591,6 @@ var FISHTANK = (function () {
         this.sandBlump.batch(this.batch);
 
         this.waterTexture = this.textureCache.cache("water.jpg");
-
         this.digits = this.batch.load("digits.png");
         this.scoreBack = this.batch.load("scoreBack.png");
 
@@ -754,22 +768,16 @@ var FISHTANK = (function () {
         );
     };
 
-    Tank.prototype.updateScore = function (width, height) {
+    Tank.prototype.updateScore = function (width, height, collected) {
         width = Math.round(Math.max(width * 0.15, 150));
         height = Math.round(this.scoreCanvas.width * this.scoreBack.height / this.scoreBack.width);
 
-        var starCount = this.stars.length,
-            collected = 0,
-            srcWidth = this.digits.width / 10,
+        var srcWidth = this.digits.width / 10,
             srcHeight = this.digits.height,
             digitHeight = height * 0.5,
             digitWidth = digitHeight * srcWidth / srcHeight;
-        for (var s = 0; s < starCount; ++s) {
-            if (this.stars[s].collected) {
-                ++collected;
-            }
-        }
-        var scoreData = JSON.stringify({w: width, h: height, stars: starCount, collected: collected});
+
+        var scoreData = JSON.stringify({w: width, h: height, stars: this.winCount, collected: collected});
         if (this.scoreData === scoreData) {
             return;
         }
@@ -783,7 +791,7 @@ var FISHTANK = (function () {
         this.drawScore(collected, width * 0.05, height * 0.15, digitWidth, digitHeight, srcWidth, srcHeight, [1,1,1]);
         digitHeight *= 0.8;
         digitWidth *= 0.8;
-        this.drawScore(starCount, width * 0.55, height * 0.50, digitWidth, digitHeight, srcWidth, srcHeight, [1,0.5,0.1]);
+        this.drawScore(this.winCount, width * 0.55, height * 0.50, digitWidth, digitHeight, srcWidth, srcHeight, [1,0.5,0.1]);
     };
 
     Tank.prototype.update = function (now, elapsed, keyboard, pointer, width, height) {
@@ -808,7 +816,22 @@ var FISHTANK = (function () {
             halfHeight = height - halfWidth;
         }
 
-        if (!this.gameStarted) {
+        if (this.winState !== null) {
+            this.winState -= elapsed * fadeRate;
+            if (this.winState > WIN_FADE_START) {
+                if (this.winState < WIN_CAN_SKIP && (keyboard.keysDown() > 0 || pointer.activated())) {
+                    this.winState = WIN_FADE_START;
+                }
+            } else if (this.winState <= 0) {
+                this.winState = null;
+                this.winOverlay.classList.add("hidden");
+                this.winOverlay.style.opacity = 1;
+            } else {
+                this.winOverlay.style.opacity = this.winState;
+                this.tint = 1 - this.winState;
+                this.jellyfish.alive = false;
+            }
+        } else if (!this.gameStarted) {
             if (this.titleState === null) {
                 this.titleState = TITLE_INSTRUCTIONS;
                 var loading = document.getElementById("loading"),
@@ -820,7 +843,7 @@ var FISHTANK = (function () {
                     this.titleState = TITLE_FADE_START;
                 }
             } else {
-                this.titleState -= elapsed * 0.001;
+                this.titleState -= elapsed * fadeRate;
                 if (this.titleState <= 0) {
                     this.titleState = 0;
                     this.gameStarted = true;
@@ -903,8 +926,6 @@ var FISHTANK = (function () {
             }
         }
 
-        this.updateScore(width, height);
-
         this.urchinAnim.update(elapsed);
         this.starAnim.update(elapsed);
 
@@ -928,6 +949,22 @@ var FISHTANK = (function () {
         if (this.dyingStar && this.dyingStar.thing.dieAnim.update(elapsed)) {
             this.dyingStar.thing.dieAnim = null;
             this.dyingStar = null;
+        }
+
+        var collectedCount = 0;
+        for (var s = 0; s < this.stars.length; ++s) {
+            if (this.stars[s].collected) {
+                ++collectedCount;
+            }
+        }
+
+        this.updateScore(width, height, collectedCount);
+
+        if (this.winState === null && !this.dyingStar && collectedCount >= this.winCount && this.jellyfish.alive) {
+            this.winState = WIN_TIME;
+            this.winSound.play();
+            this.winOverlay.classList.remove("hidden");
+            this.tint = 0.5;
         }
     };
 

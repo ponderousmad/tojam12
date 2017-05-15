@@ -16,6 +16,15 @@ html, body {
     position: absolute;
 }
 
+.win {
+   left:50%;
+   top:50%;
+   transform: translate(-50%, -50%);
+   -webkit-transform: translate(-50%, -50%);
+   -moz-transform: translate(-50%, -50%);
+   position: absolute;
+}
+
 .centeredHigh {
    left:50%;
    top:35%;
