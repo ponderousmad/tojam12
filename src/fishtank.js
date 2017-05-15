@@ -973,15 +973,15 @@ var FISHTANK = (function () {
                 }
             }
 
+            // Need to draw billboards last for alpha blending to work.
+            this.jellyfish.thing.render(room, this.program, eye);
+
             if (this.dyingStar) {
                 starMesh = this.dyingStar.thing.dieAnim.mesh();
                 room.bindMeshGeometry(starMesh, this.program);
                 room.bindMeshTexture(starMesh, this.program);
                 room.drawMeshElements(starMesh, this.program, this.dyingStar.thing.renderTransform(eye));
             }
-
-            // Need to draw billboards last for alpha blending to work.
-            this.jellyfish.thing.render(room, this.program, eye);
         }
     };
 
