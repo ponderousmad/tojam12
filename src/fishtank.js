@@ -17,7 +17,7 @@ var FISHTANK = (function () {
         this.radialDistance = 0.71;
 
         this.turnRate = Math.PI * 0.001;
-        this.radialVelocityDecay = 5;
+        this.velocityDrag = 10;
         this.gravity = 0.000001;
         this.swimVelocity = 0.001;
 
@@ -68,7 +68,7 @@ var FISHTANK = (function () {
         var animElapsed = elapsed,
             gravity = this.gravity * parseFloat(gravityValue) / 100,
             velocity = this.swimVelocity * parseFloat(velocityValue) / 100,
-            velocityDrag = this.radialVelocityDecay * parseFloat(dragValue) / 100;
+            velocityDrag = this.velocityDrag * parseFloat(dragValue) / 100;
         if (!started) {
             elapsed = 0;
         }
@@ -107,7 +107,9 @@ var FISHTANK = (function () {
         var vVel = this.verticalVelocity,
             hVel = this.radialVelocity * this.radialDistance,
             totalVel = Math.sqrt(vVel * vVel + hVel * hVel),
-            drag = totalVel * velocityDrag * elapsed; 
+            drag = totalVel * velocityDrag * elapsed;
+
+        console.log(totalVel, drag);
 
         var mesh = null;
         if (this.deathAnim) {
@@ -122,7 +124,7 @@ var FISHTANK = (function () {
 
         var direction = Math.sign(this.radialVelocity);
         if (direction) {
-            this.radialVelocity -= this.radialVelocity * drag;
+            this.radialVelocity -= this.radialVelocity * drag * this.radialDistance;
             if (Math.sign(this.radialVelocity) !== direction) {
                 this.radialVelocity = 0;
             }
@@ -143,6 +145,8 @@ var FISHTANK = (function () {
             this.verticalVelocity -= gravity * elapsed;
             if (Math.abs(slowBy) > Math.abs(this.verticalVelocity)) {
                 this.verticalVelocity = 0;
+            } else {
+                this.verticalVelocity -= slowBy;
             }
         } else {
             this.verticalVelocity -= this.verticalVelocity * breaks * elapsed;
@@ -503,7 +507,7 @@ var FISHTANK = (function () {
     Tank.prototype.load = function (data) {
         gravityValue = data.gravity || gravityValue;
         velocityValue = data.velocity || velocityValue;
-        dragValue = data.velocity || dragValue;
+        dragValue = data.drag || dragValue;
         this.initParameters();
 
         this.stars = [];

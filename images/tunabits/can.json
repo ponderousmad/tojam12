@@ -105,7 +105,7 @@
     ],
     "gravity": 10,
     "velocity": 50,
-    "drag": 40,
+    "drag": 50,
     "stars": [
         {
             "angle": "-163.95",
