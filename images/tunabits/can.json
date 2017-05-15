@@ -1,7 +1,4 @@
 {
-    "gravity": 10,
-    "velocity": 50,
-    "drag": 40,
     "pixelSize": 0.004,
     "depthRange": 0.12,
     "depthOffset": 0.6,
@@ -106,6 +103,9 @@
             "angle": 315
         }
     ],
+    "gravity": 10,
+    "velocity": 50,
+    "drag": 40,
     "stars": [
         {
             "angle": "-163.95",
