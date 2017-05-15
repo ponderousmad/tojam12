@@ -139,7 +139,7 @@ var FISHTANK = (function () {
         }
 
         for (var o = 0; o < obstacles.length; ++o) {
-            if (!this.alive) {
+            if (!this.alive || !started) {
                 break;
             }
             var obstacle = obstacles[o],
@@ -290,6 +290,7 @@ var FISHTANK = (function () {
 
         this.tint = 1.0;
         this.gameStarted = false;
+        this.editing = false;
         this.titleState = null;
         this.music = new BLORT.Tune("sounds/MusicLoop");
 
@@ -371,6 +372,13 @@ var FISHTANK = (function () {
         this.overlay.addEventListener("click", function (e) {
             self.clickOverlay();
         }, true);
+
+        var editToggle = document.getElementById("buttonEdit");
+        if (editToggle) {
+            editToggle.addEventListener("click", function (e) {
+                self.editing = !self.editing;
+            }, true);
+        }
     };
 
     Tank.prototype.initParameters = function () {
@@ -810,6 +818,21 @@ var FISHTANK = (function () {
             if (this.tint > 0.5) {
                 this.tint -= elapsed * fadeRate;
             }
+        } else if (this.editing) {
+            var heightScale = 0.001,
+                angleScale = 0.001;
+            if (keyboard.isKeyDown(IO.KEYS.Up)) {
+                this.jellyfish.height += elapsed * heightScale;
+            }
+            if (keyboard.isKeyDown(IO.KEYS.Down)) {
+                this.jellyfish.height -= elapsed * heightScale;
+            }
+            if (keyboard.isKeyDown(IO.KEYS.Left)) {
+                this.jellyfish.positionAngle += elapsed * angleScale;
+            }
+            if (keyboard.isKeyDown(IO.KEYS.Right)) {
+                this.jellyfish.positionAngle -= elapsed * angleScale;
+            }
         } else {
             if (!this.music.playing && this.music.isLoaded()) {
                 this.music.play();
@@ -876,7 +899,7 @@ var FISHTANK = (function () {
             thing.update(elapsed);
         }
 
-        var collected = this.jellyfish.update(this.gameStarted, elapsed, swim, steer, this.obstacles);
+        var collected = this.jellyfish.update(this.gameStarted && !this.editing, elapsed, swim, steer, this.obstacles);
         this.towerRotation = this.jellyfish.positionAngle;
         this.eyeHeight = this.jellyfish.height;
 
