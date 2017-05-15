@@ -5,7 +5,11 @@ var FISHTANK = (function () {
         velocityValue = 50,
         dragValue = 40,
         BATCH_CAN = 1,
-        BATCH_FLIPS = 2;
+        BATCH_FLIPS = 2,
+        TITLE_INSTRUCTIONS = 2,
+        TITLE_FADE_START = 1,
+        STAR_OFFSET = 0.72,
+        URCHIN_OFFSET = 0.78;
 
     function Jellyfish(idleFlip, swimFlip, deathFlip) {
         this.thing = null;
@@ -323,9 +327,11 @@ var FISHTANK = (function () {
             };
         }
 
-        setupSlider("Gravity", function (value) { gravityValue = value; })(gravityValue);
-        setupSlider("Velocity", function (value) { velocityValue = value; })(velocityValue);
-        setupSlider("Drag", function (value) { dragValue = value; })(dragValue);
+        this.initGravity = setupSlider("Gravity", function (value) { gravityValue = value; });
+        this.initVelocity = setupSlider("Velocity", function (value) { velocityValue = value; });
+        this.initDrag = setupSlider("Drag", function (value) { dragValue = value; });
+
+        this.initParameters();
 
         var self = this;
         this.selectObstacle = document.getElementById("selectObstacle");
@@ -342,6 +348,17 @@ var FISHTANK = (function () {
         var clipboardButton = document.getElementById("buttonClipboard");
         if (clipboardButton) {
             this.editArea = document.getElementById("textData");
+            if (this.editArea) {
+                this.editArea.addEventListener("paste", function (event) {
+                    setTimeout(function () {
+                        var textData = self.editArea.value;
+                        if (textData[0] === "{") {
+                            self.load(JSON.parse(textData));
+                            self.setupObstacles();
+                        }
+                    });
+                }, false);
+            }
             clipboardButton.addEventListener("click", function(e) {
                 self.editArea.value = self.save();
                 self.editArea.select();
@@ -356,18 +373,26 @@ var FISHTANK = (function () {
         }, true);
     };
 
+    Tank.prototype.initParameters = function () {
+        this.initGravity(gravityValue);
+        this.initDrag(dragValue);
+        this.initVelocity(velocityValue);
+    };
+
     Tank.prototype.clickOverlay = function () {
-        if (this.titleState !== null && this.titleState > 1) {
-            this.titleState = 1;
+        if (this.titleState === TITLE_INSTRUCTIONS) {
+            this.titleState = TITLE_FADE_START;
         }
     };
 
     Tank.prototype.connectSelectObstacles = function () {
         if (this.selectObstacle) {
+            this.activeObstacle = null;
             this.selectObstacle.innerHTML = "";
 
             var starCount = 0,
                 urchinCount = 0,
+                first = null,
                 self =  this,
                 addObstacles = function (type) {
                     for (var o = 0; o < self.obstacles.length; ++o) {
@@ -379,6 +404,9 @@ var FISHTANK = (function () {
                         if (obstacle.type === "obsStar") {
                             ++starCount;
                             name = "Star " + starCount;
+                            if (self.activeObstacle === null) {
+                                self.activeObstacle = obstacle;
+                            }
                         } else if (obstacle.type == "obsUrchin") {
                             ++urchinCount;
                             name = "Urchin " + urchinCount;
@@ -391,18 +419,24 @@ var FISHTANK = (function () {
 
             addObstacles("obsStar");
             addObstacles("obsUrchin");
+            self.connectObstacleControls();
         }
     };
 
     Tank.prototype.setObstacleAngle = function (value) {
         if (this.activeObstacle) {
+            var angle = value * R2.DEG_TO_RAD,
+                offset = this.activeObstacle.type == "obsStar" ? STAR_OFFSET : URCHIN_OFFSET;
+            this.activeObstacle.position.x = Math.cos(angle) * offset;
+            this.activeObstacle.position.z = Math.sin(angle) * offset;
+            this.activeObstacle.thing.setPosition(this.activeObstacle.position);
         }
     };
 
     Tank.prototype.setObstacleHeight = function (value) {
         if (this.activeObstacle) {
             this.activeObstacle.position.y = value;
-            this.activeObstacle.thing.position.y = value;
+            this.activeObstacle.thing.setPosition(this.activeObstacle.position);
         }
     };
 
@@ -425,10 +459,11 @@ var FISHTANK = (function () {
 
         for (var o = 0; o < this.obstacles.length; ++o) {
             var obstacle = this.obstacles[o],
-                angle = R2.clampAngle(Math.atan2(obstacle.position.z, obstacle.position.x)),
+                pos = obstacle.thing ? obstacle.thing.position : obstacle.position,
+                angle = R2.clampAngle(Math.atan2(pos.z, pos.x)),
                 entry = {
                     angle: (angle * R2.RAD_TO_DEG).toFixed(2),
-                    height: obstacle.position.y.toFixed(3)
+                    height: pos.y.toFixed(3)
                 };
             if (obstacle.type === "obsStar") {
                 data.stars.push(entry);
@@ -439,6 +474,42 @@ var FISHTANK = (function () {
         }
 
         return JSON.stringify(data, null, 4);
+    };
+
+    function calculatePosition(data, offset) {
+        var height = parseFloat(data.height) || 0,
+            angle = (parseFloat(data.angle) || 0) * R2.DEG_TO_RAD;
+        return new R3.V(Math.cos(angle) * offset, height, Math.sin(angle) * offset);
+    }
+
+    Tank.prototype.load = function (data) {
+        gravityValue = data.gravity || gravityValue;
+        velocityValue = data.velocity || velocityValue;
+        dragValue = data.velocity || dragValue;
+        this.initParameters();
+
+        this.stars = [];
+        this.urchins = [];
+
+        var colliders = [];
+        for (var o = 0; o < this.obstacles.length; ++o) {
+            var obstacle = this.obstacles[o];
+            if (obstacle.type === "obsStar" || obstacle.type === "obsUrchin") {
+                continue;
+            }
+            colliders.push(obstacle);
+        }
+        this.obstacles = colliders;
+
+        for (var s = 0; s < data.stars.length; ++s) {
+            var star = data.stars[s];
+            this.obstacles.push(new Obstacle(calculatePosition(star, STAR_OFFSET), "obsStar"));
+        }
+
+        for (var u = 0; u < data.urchins.length; ++u) {
+            var urchin = data.urchins[u];
+            this.obstacles.push(new Obstacle(calculatePosition(urchin, URCHIN_OFFSET), "obsUrchin"));
+        }
     };
 
     Tank.prototype.batchAnimations = function (data) {
@@ -455,13 +526,13 @@ var FISHTANK = (function () {
         this.updateBatch();
     };
 
-    Tank.prototype.batchCan = function (blumpData) {
-        for (var d = 0; d < blumpData.blumps.length; ++d) {
+    Tank.prototype.batchCan = function (worldData) {
+        for (var d = 0; d < worldData.blumps.length; ++d) {
             var blump = new BLUMP.Blump(
-                blumpData.blumps[d],
-                blumpData.pixelSize || 0.001,
-                blumpData.depthRange || 0.2,
-                blumpData.depthOffset || 0.1,
+                worldData.blumps[d],
+                worldData.pixelSize || 0.001,
+                worldData.depthRange || 0.2,
+                worldData.depthOffset || 0.1,
                 BLIT.ALIGN.Bottom
             );
             this.blumps.push(blump);
@@ -486,6 +557,8 @@ var FISHTANK = (function () {
 
         this.digits = this.batch.load("digits.png");
         this.scoreBack = this.batch.load("scoreBack.png");
+
+        this.load(worldData);
 
         this.loadState |= BATCH_CAN;
         this.updateBatch();
@@ -577,31 +650,25 @@ var FISHTANK = (function () {
         this.jellyfish.swimFlip.constructMeshes();
         this.jellyfish.deathFlip.constructMeshes();
 
-        for (var o = 0; o < this.obstacles.length; ++o) {
+        this.setupObstacles();
+
+        this.loadState = null;
+    };
+
+    Tank.prototype.setupObstacles = function () {
+                for (var o = 0; o < this.obstacles.length; ++o) {
             var obstacle = this.obstacles[o];
             if (obstacle.type === "obsUrchin") {
-                var urchin = new BLOB.Thing(),
-                    urchinLocation = obstacle.position.copy();
-                if (urchinLocation.y < -0.2) {
-                    continue;
-                }
-                urchinLocation.x *= 1.3;
-                urchinLocation.z *= 1.3;
-                urchin.setPosition(urchinLocation);
+                var urchin = new BLOB.Thing();
+                urchin.setPosition(obstacle.position);
                 urchin.scaleBy(0.15);
                 urchin.setBillboardUp(new R3.V(0, 1, 0));
                 this.urchins.push(urchin);
                 obstacle.thing = urchin;
             }
             if (obstacle.type === "obsStar") {
-                var star = new BLOB.Thing(),
-                    starPos = obstacle.position.copy();
-                if (starPos.y < -0.2) {
-                    continue;
-                }
-                starPos.x *= 1.2;
-                starPos.z *= 1.2;
-                star.setPosition(starPos);
+                var star = new BLOB.Thing();
+                star.setPosition(obstacle.position);
                 star.scaleBy(0.1);
                 star.setBillboardUp(new R3.V(0, 1, 0));
                 this.stars.push(star);
@@ -610,8 +677,6 @@ var FISHTANK = (function () {
             }
         }
         this.connectSelectObstacles();
-
-        this.loadState = null;
     };
 
     Tank.prototype.setupRoom = function (room) {
@@ -723,14 +788,14 @@ var FISHTANK = (function () {
 
         if (!this.gameStarted) {
             if (this.titleState === null) {
-                this.titleState = 2;
+                this.titleState = TITLE_INSTRUCTIONS;
                 var loading = document.getElementById("loading"),
                     instructions = document.getElementById("instructions");
                 loading.classList.add("hidden");
                 instructions.classList.remove("hidden");
-            } else if (this.titleState > 1) {
+            } else if (this.titleState === TITLE_INSTRUCTIONS) {
                 if (keyboard.keysDown() > 0 || pointer.activated()) {
-                    this.titleState = 1;
+                    this.titleState = TITLE_FADE_START;
                 }
             } else {
                 this.titleState -= elapsed * 0.001;
@@ -746,8 +811,6 @@ var FISHTANK = (function () {
                 this.tint -= elapsed * fadeRate;
             }
         } else {
-            this.updateScore(width, height);
-
             if (!this.music.playing && this.music.isLoaded()) {
                 this.music.play();
             }
@@ -802,6 +865,8 @@ var FISHTANK = (function () {
                 steer = -1;
             }
         }
+
+        this.updateScore(width, height);
 
         this.urchinAnim.update(elapsed);
         this.starAnim.update(elapsed);
@@ -914,7 +979,11 @@ var FISHTANK = (function () {
         }, true);
     }
 
+    window.onload = function(e) {
+        MAIN.setupToggleControls();
+        start();
+    };
+
     return {
-        start: start
     };
 }());

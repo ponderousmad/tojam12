@@ -1,4 +1,7 @@
 {
+    "gravity": 30,
+    "velocity": 50,
+    "drag": 40,
     "pixelSize": 0.004,
     "depthRange": 0.12,
     "depthOffset": 0.6,
@@ -23,11 +26,6 @@
                     "x": 10,
                     "y": 70,
                     "type": "obstacle"
-                },
-                {
-                    "x": 125,
-                    "y": 75,
-                    "type": "obsUrchin"
                 }
             ]
         },
@@ -52,14 +50,7 @@
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "xEdgeMode": 2,
-            "angle": 135,
-            "POIs" : [
-                {
-                    "x": 125,
-                    "y": 75,
-                    "type": "obsStar"
-                }
-            ]
+            "angle": 135
         },
         {
             "resource": "tunabits/tuna_depth1.png",
@@ -81,11 +72,6 @@
                     "x": 10,
                     "y": 70,
                     "type": "obstacle"
-                },
-                {
-                    "x": 125,
-                    "y": 74,
-                    "type": "obsUrchin"
                 }
             ]
         },
@@ -110,14 +96,283 @@
             "geometry": "cylinder",
             "cylinderAngle": 45,
             "xEdgeMode": 2,
-            "angle": 315,
-            "POIs" : [
-                {
-                    "x": 125,
-                    "y": 75,
-                    "type": "obsStar"
-                }
-            ]
+            "angle": 315
+        }
+    ],
+    "stars": [
+        {
+            "angle": "-163.95",
+            "height": "-0.044"
+        },
+        {
+            "angle": "16.05",
+            "height": "-0.044"
+        },
+        {
+            "angle": "-43.95",
+            "height": "0.442"
+        },
+        {
+            "angle": "136.05",
+            "height": "0.442"
+        },
+        {
+            "angle": "46.05",
+            "height": "0.929"
+        },
+        {
+            "angle": "-133.95",
+            "height": "0.929"
+        },
+        {
+            "angle": "136.05",
+            "height": "1.415"
+        },
+        {
+            "angle": "-43.95",
+            "height": "1.415"
+        },
+        {
+            "angle": "-163.95",
+            "height": "1.902"
+        },
+        {
+            "angle": "16.05",
+            "height": "1.902"
+        },
+        {
+            "angle": "-43.95",
+            "height": "2.388"
+        },
+        {
+            "angle": "136.05",
+            "height": "2.388"
+        },
+        {
+            "angle": "168.05",
+            "height": "2.874"
+        },
+        {
+            "angle": "-11.95",
+            "height": "2.874"
+        },
+        {
+            "angle": "46.05",
+            "height": "3.361"
+        },
+        {
+            "angle": "-133.95",
+            "height": "3.361"
+        },
+        {
+            "angle": "136.05",
+            "height": "3.847"
+        },
+        {
+            "angle": "-43.95",
+            "height": "3.847"
+        },
+        {
+            "angle": "-163.95",
+            "height": "4.334"
+        },
+        {
+            "angle": "16.05",
+            "height": "4.334"
+        },
+        {
+            "angle": "-43.95",
+            "height": "4.820"
+        },
+        {
+            "angle": "136.05",
+            "height": "4.820"
+        },
+        {
+            "angle": "168.05",
+            "height": "5.306"
+        },
+        {
+            "angle": "-11.95",
+            "height": "5.306"
+        },
+        {
+            "angle": "46.05",
+            "height": "5.793"
+        },
+        {
+            "angle": "-133.95",
+            "height": "5.793"
+        },
+        {
+            "angle": "136.05",
+            "height": "6.279"
+        },
+        {
+            "angle": "-43.95",
+            "height": "6.279"
+        },
+        {
+            "angle": "-163.95",
+            "height": "6.766"
+        },
+        {
+            "angle": "16.05",
+            "height": "6.766"
+        },
+        {
+            "angle": "-43.95",
+            "height": "7.252"
+        },
+        {
+            "angle": "136.05",
+            "height": "7.252"
+        },
+        {
+            "angle": "168.05",
+            "height": "7.738"
+        },
+        {
+            "angle": "-11.95",
+            "height": "7.738"
+        }
+    ],
+    "urchins": [
+        {
+            "angle": "-73.95",
+            "height": "-0.044"
+        },
+        {
+            "angle": "106.05",
+            "height": "-0.040"
+        },
+        {
+            "angle": "46.05",
+            "height": "0.442"
+        },
+        {
+            "angle": "-133.95",
+            "height": "0.446"
+        },
+        {
+            "angle": "136.05",
+            "height": "0.929"
+        },
+        {
+            "angle": "-43.95",
+            "height": "0.933"
+        },
+        {
+            "angle": "-133.95",
+            "height": "1.415"
+        },
+        {
+            "angle": "46.05",
+            "height": "1.419"
+        },
+        {
+            "angle": "-73.95",
+            "height": "1.902"
+        },
+        {
+            "angle": "106.05",
+            "height": "1.906"
+        },
+        {
+            "angle": "46.05",
+            "height": "2.388"
+        },
+        {
+            "angle": "-133.95",
+            "height": "2.392"
+        },
+        {
+            "angle": "-101.95",
+            "height": "2.874"
+        },
+        {
+            "angle": "78.05",
+            "height": "2.878"
+        },
+        {
+            "angle": "136.05",
+            "height": "3.361"
+        },
+        {
+            "angle": "-43.95",
+            "height": "3.365"
+        },
+        {
+            "angle": "-133.95",
+            "height": "3.847"
+        },
+        {
+            "angle": "46.05",
+            "height": "3.851"
+        },
+        {
+            "angle": "-73.95",
+            "height": "4.334"
+        },
+        {
+            "angle": "106.05",
+            "height": "4.338"
+        },
+        {
+            "angle": "46.05",
+            "height": "4.820"
+        },
+        {
+            "angle": "-133.95",
+            "height": "4.824"
+        },
+        {
+            "angle": "-101.95",
+            "height": "5.306"
+        },
+        {
+            "angle": "78.05",
+            "height": "5.310"
+        },
+        {
+            "angle": "136.05",
+            "height": "5.793"
+        },
+        {
+            "angle": "-43.95",
+            "height": "5.797"
+        },
+        {
+            "angle": "-133.95",
+            "height": "6.279"
+        },
+        {
+            "angle": "46.05",
+            "height": "6.283"
+        },
+        {
+            "angle": "-73.95",
+            "height": "6.766"
+        },
+        {
+            "angle": "106.05",
+            "height": "6.770"
+        },
+        {
+            "angle": "46.05",
+            "height": "7.252"
+        },
+        {
+            "angle": "-133.95",
+            "height": "7.256"
+        },
+        {
+            "angle": "-101.95",
+            "height": "7.738"
+        },
+        {
+            "angle": "78.05",
+            "height": "7.742"
         }
     ]
 }
