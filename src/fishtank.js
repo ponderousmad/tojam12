@@ -662,7 +662,7 @@ var FISHTANK = (function () {
         var hOffset = 0,
             angles = [30, 270, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58, 180, 90, 30, 270, 58],
             sandThing = new BLOB.Thing(this.sandBlump.mesh),
-            waterThing = new BLOB.Thing(WGL.makeBillboard(WGL.uvFill()));
+            waterThing = new BLOB.Thing(WGL.makePlane(WGL.uvFill()));
         this.things.push(sandThing);
         sandThing.rotate(-Math.PI / 2, new R3.V(1, 0, 0));
         sandThing.move(new R3.V(0, -0.45, 0));
@@ -996,11 +996,11 @@ var FISHTANK = (function () {
             for (var t = 0; t < this.things.length; ++t) {
                 var thing = this.things[t];
                 if (t < 2 || Math.abs(thing.position.y - eye.y) < drawHeight) {
-                    thing.render(room, this.program, eye);
+                    thing.render(room, this.program);
                 }
             }
             for (var b = 0; b < this.backgrounds.length; ++b) {
-                this.backgrounds[b].render(room, this.program, eye);
+                this.backgrounds[b].render(room, this.program);
             }
 
             room.gl.depthMask(false);
@@ -1025,7 +1025,7 @@ var FISHTANK = (function () {
             }
 
             // Need to draw billboards last for alpha blending to work.
-            this.jellyfish.thing.render(room, this.program, eye);
+            this.jellyfish.thing.render(room, this.program);
 
             if (this.dyingStar) {
                 starMesh = this.dyingStar.thing.dieAnim.mesh();
