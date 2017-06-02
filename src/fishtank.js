@@ -929,11 +929,6 @@ var FISHTANK = (function () {
         this.urchinAnim.update(elapsed);
         this.starAnim.update(elapsed);
 
-        for (var t = 0; t < this.things.length; ++t) {
-            var thing = this.things[t];
-            thing.update(elapsed);
-        }
-
         var collected = this.jellyfish.update(this.gameStarted && !this.editing, elapsed, swim, steer, this.obstacles);
         this.towerRotation = this.jellyfish.positionAngle;
         this.eyeHeight = this.jellyfish.height;
